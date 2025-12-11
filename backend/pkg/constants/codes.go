@@ -1,0 +1,31 @@
+package constants
+
+// AppCode represents a standardized application code
+type AppCode string
+
+const (
+	// Success Codes
+	CODE_SUCCESS AppCode = "SUCCESS"
+	CODE_CREATED AppCode = "CREATED"
+	CODE_UPDATED AppCode = "UPDATED"
+	CODE_DELETED AppCode = "DELETED"
+
+	// General Error Codes
+	CODE_INTERNAL_ERROR AppCode = "INTERNAL_ERROR"
+	CODE_INVALID_INPUT  AppCode = "INVALID_INPUT"
+	CODE_UNAUTHORIZED   AppCode = "UNAUTHORIZED"
+	CODE_FORBIDDEN      AppCode = "FORBIDDEN"
+	CODE_NOT_FOUND      AppCode = "NOT_FOUND"
+
+	// User Specific Codes
+	CODE_USER_NOT_FOUND       AppCode = "USER_NOT_FOUND"
+	CODE_EMAIL_ALREADY_EXISTS AppCode = "EMAIL_ALREADY_EXISTS"
+	CODE_INVALID_CREDENTIALS  AppCode = "INVALID_CREDENTIALS"
+
+	// Product/Order Specific Codes
+	CODE_PRODUCT_NOT_FOUND  AppCode = "PRODUCT_NOT_FOUND"
+	CODE_ORDER_NOT_FOUND    AppCode = "ORDER_NOT_FOUND"
+	CODE_INSUFFICIENT_STOCK AppCode = "INSUFFICIENT_STOCK"
+	CODE_TABLE_OCCUPIED     AppCode = "TABLE_OCCUPIED"
+	CODE_TABLE_NOT_FOUND    AppCode = "TABLE_NOT_FOUND"
+)
