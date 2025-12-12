@@ -18,6 +18,8 @@ import (
 func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	// 1. Repositories
 	userRepo := gorm_repo.NewUserRepository(db)
+	categoryRepo := gorm_repo.NewCategoryRepository(db)
+	productRepo := gorm_repo.NewProductRepository(db)
 	orderRepo := gorm_repo.NewOrderRepository(db)
 	transactionRepo := gorm_repo.NewTransactionRepository(db)
 	workPeriodRepo := gorm_repo.NewWorkPeriodRepository(db)
@@ -25,6 +27,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	// 2. Services
 	authService := services.NewAuthService(userRepo)
 	userService := services.NewUserService(userRepo)
+	categoryService := services.NewCategoryService(categoryRepo)
+	productService := services.NewProductService(productRepo)
+	transactionService := services.NewTransactionService(transactionRepo)
 	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo)
 	analyticsService := services.NewAnalyticsService(db, transactionRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
@@ -32,6 +37,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	// 3. Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	productHandler := handlers.NewProductHandler(productService)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 	orderHandler := handlers.NewOrderHandler(orderService)
 	managementHandler := handlers.NewManagementHandler(managementService)
 	analyticsHandler := handlers.NewAnalyticsHandler(analyticsService)
@@ -51,21 +59,42 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 		return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Tostcu POS Backend is running!", nil)
 	})
 
-	// User Management Routes (Protected + Admin Only)
-	users := v1.Group("/users", middleware.RequireRole("admin"))
-	users.Post("/", userHandler.Create)
+	// Public Menu Routes (Authenticated users can see menu)
+	// Authenticated users (waiters) need to see categories/products
+	// Actually requirements said: "GET /api/v1/products (Optional: filter by category_id)"
+	// Let's keep them under v1 (Protected) so only logged in users (waiters/admins) can see them.
+	// Or should they be public? POS usually requires login. Let's keep them in v1.
+	v1.Get("/categories", categoryHandler.GetAll)
+	v1.Get("/products", productHandler.GetAll)
 
-	// Management Routes (Protected + Admin Only)
-	management := v1.Group("/management", middleware.RateLimiter(5, time.Minute), middleware.RequireRole("admin"))
+	// Admin Only Routes
+	admin := v1.Group("/", middleware.RequireRole("admin"))
+
+	// User Management
+	admin.Post("/users", userHandler.Create)
+
+	// Menu Management (Admin)
+	admin.Post("/categories", categoryHandler.Create)
+	admin.Post("/products", productHandler.Create)
+	admin.Put("/products/:id", productHandler.Update)
+
+	// Expense Management (Admin)
+	admin.Post("/transactions/expense", transactionHandler.AddExpense)
+
+	// Management Routes (Admin)
+	management := admin.Group("/management", middleware.RateLimiter(5, time.Minute))
 	management.Post("/start-day", managementHandler.StartDay)
 	management.Post("/end-day", managementHandler.EndDay)
 
-	// Order Routes (Protected)
+	// Order Routes (Protected for All Roles)
 	orders := v1.Group("/orders")
 	orders.Post("/", orderHandler.Create)
 	orders.Post("/:id/close", orderHandler.Close)
 
-	// Analytics Routes (Protected)
+	// Analytics Routes (Protected for All Roles? Usually Admin)
+	// Let's secure analytics for Admin only as well, or keep it open if waiters need to see daily report.
+	// Task didn't specify, but safer to keep analytics secure.
+	// Existing code had it under v1 (Protected). Let's leave it there for now.
 	analytics := v1.Group("/analytics")
 	analytics.Get("/daily", analyticsHandler.GetDailyReport)
 }

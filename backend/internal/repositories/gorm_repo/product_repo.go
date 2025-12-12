@@ -33,6 +33,16 @@ func (r *productRepository) FindAll() ([]models.Product, error) {
 	return products, nil
 }
 
+// Find products by Category ID
+// Kategori ID'ye göre ürünleri bulur
+func (r *productRepository) FindByCategoryID(categoryID uint) ([]models.Product, error) {
+	var products []models.Product
+	if err := r.db.Where("category_id = ?", categoryID).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
 // Find a product by ID
 // ID ile bir ürün bulur
 func (r *productRepository) FindByID(id uint) (*models.Product, error) {

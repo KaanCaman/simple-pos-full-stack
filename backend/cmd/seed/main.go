@@ -41,4 +41,17 @@ func main() {
 	}
 
 	log.Printf("Admin user created! ID: %d, PIN: %s", admin.ID, pin)
+
+	// 3. Seed Categories and Products
+	toastCat := models.Category{Name: "Tostlar", SortOrder: 1, IsActive: true}
+	drinkCat := models.Category{Name: "İçecekler", SortOrder: 2, IsActive: true}
+	database.DB.Create(&toastCat)
+	database.DB.Create(&drinkCat)
+
+	database.DB.Create(&models.Product{Name: "Kaşarlı Tost", Price: 10000, CategoryID: toastCat.ID, IsAvailable: true}) // 100 TL
+	database.DB.Create(&models.Product{Name: "Sucuklu Tost", Price: 12000, CategoryID: toastCat.ID, IsAvailable: true}) // 120 TL
+	database.DB.Create(&models.Product{Name: "Ayran", Price: 2000, CategoryID: drinkCat.ID, IsAvailable: true})         // 20 TL
+	database.DB.Create(&models.Product{Name: "Çay", Price: 1000, CategoryID: drinkCat.ID, IsAvailable: true})           // 10 TL
+
+	log.Println("Menu seeded!")
 }

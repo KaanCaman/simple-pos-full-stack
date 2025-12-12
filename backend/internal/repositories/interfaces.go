@@ -13,7 +13,18 @@ type ProductRepository interface {
 	Create(product *models.Product) error
 	FindAll() ([]models.Product, error)
 	FindByID(id uint) (*models.Product, error)
+	FindByCategoryID(categoryID uint) ([]models.Product, error)
 	Update(product *models.Product) error
+	Delete(id uint) error
+}
+
+// CategoryRepository defines the interface for category data access
+// Kategori veri erişimi için arayüzü tanımlar
+type CategoryRepository interface {
+	Create(category *models.Category) error
+	FindAll() ([]models.Category, error)
+	FindByID(id uint) (*models.Category, error)
+	Update(category *models.Category) error
 	Delete(id uint) error
 }
 
