@@ -29,7 +29,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	authService := services.NewAuthService(userRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	productService := services.NewProductService(productRepo)
-	transactionService := services.NewTransactionService(transactionRepo)
+	transactionService := services.NewTransactionService(transactionRepo, workPeriodRepo)
 	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo, productRepo)
 	analyticsService := services.NewAnalyticsService(db, transactionRepo)
 	userService := services.NewUserService(userRepo)

@@ -8,11 +8,15 @@ import (
 )
 
 type TransactionService struct {
-	repo repositories.TransactionRepository
+	repo           repositories.TransactionRepository
+	workPeriodRepo repositories.WorkPeriodRepository
 }
 
-func NewTransactionService(repo repositories.TransactionRepository) *TransactionService {
-	return &TransactionService{repo: repo}
+func NewTransactionService(repo repositories.TransactionRepository, wpRepo repositories.WorkPeriodRepository) *TransactionService {
+	return &TransactionService{
+		repo:           repo,
+		workPeriodRepo: wpRepo,
+	}
 }
 
 // AddExpense records a manual expense
@@ -22,12 +26,23 @@ func (s *TransactionService) AddExpense(amount int64, description, category stri
 		return nil, errors.New("amount must be positive")
 	}
 
+	// 1. Find Active Work Period
+	activePeriod, err := s.workPeriodRepo.FindActivePeriod()
+	if err != nil {
+		return nil, err
+	}
+	var wpID uint
+	if activePeriod != nil {
+		wpID = activePeriod.ID
+	}
+
 	transaction := &models.Transaction{
 		Type:            "EXPENSE",
 		Category:        category,
 		Amount:          amount,
 		Description:     description,
 		TransactionDate: time.Now(),
+		WorkPeriodID:    wpID,
 	}
 
 	if err := s.repo.Create(transaction); err != nil {

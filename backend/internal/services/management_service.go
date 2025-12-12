@@ -72,7 +72,7 @@ func (s *ManagementService) EndDay(userID uint) (*models.DailyReport, error) {
 
 		if err := tx.Model(&models.Order{}).
 			Where("work_period_id = ? AND status = ?", period.ID, "COMPLETED").
-			Select("count(id) as total_orders, sum(total_amount) as total_sales").
+			Select("count(id) as total_orders, COALESCE(sum(total_amount), 0) as total_sales").
 			Scan(&res).Error; err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (s *ManagementService) EndDay(userID uint) (*models.DailyReport, error) {
 		// I'll use "CASH" matching the code I wrote before.
 		tx.Model(&models.Order{}).
 			Where("work_period_id = ? AND status = ? AND payment_method = ?", period.ID, "COMPLETED", "CASH").
-			Select("sum(total_amount)").
+			Select("COALESCE(sum(total_amount), 0)").
 			Scan(&cashSales)
 		report.CashSales = cashSales
 		report.PosSales = report.TotalSales - report.CashSales
@@ -95,7 +95,7 @@ func (s *ManagementService) EndDay(userID uint) (*models.DailyReport, error) {
 		var totalExpenses int64
 		tx.Model(&models.Transaction{}).
 			Where("work_period_id = ? AND type = ?", period.ID, "EXPENSE").
-			Select("sum(amount)").
+			Select("COALESCE(sum(amount), 0)").
 			Scan(&totalExpenses)
 		report.TotalExpenses = totalExpenses
 		report.NetProfit = report.TotalSales - report.TotalExpenses
