@@ -53,6 +53,7 @@ func Migrate() {
 		&models.Transaction{},
 		&models.DailyReport{},
 		&models.ProductSalesStat{},
+		&models.WorkPeriod{},
 	)
 	// Error check
 	// Hata kontrolü

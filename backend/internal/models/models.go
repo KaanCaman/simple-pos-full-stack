@@ -66,11 +66,18 @@ const (
 	OrderStatusCancelled = "cancelled"
 )
 
+// Payment Method Enum
+const (
+	PaymentMethodCash       = "CASH"
+	PaymentMethodCreditCard = "CREDIT_CARD"
+)
+
 // Order represents a customer order
 // Müşteri siparişi
 type Order struct {
 	BaseModel
 	OrderNumber   string      `gorm:"size:50;uniqueIndex;not null" json:"order_number"` // UUID or Generated
+	WorkPeriodID  uint        `gorm:"index" json:"work_period_id"`                      // Link to WorkPeriod
 	TableID       *uint       `json:"table_id"`
 	WaiterID      *uint       `json:"waiter_id"`
 	Status        string      `gorm:"size:20;default:'open'" json:"status" validate:"oneof=open completed cancelled"`
@@ -104,6 +111,7 @@ type Transaction struct {
 	Amount          int64     `gorm:"not null" json:"amount"`
 	Description     string    `json:"description"`
 	OrderID         *uint     `json:"order_id"`
+	WorkPeriodID    uint      `gorm:"index" json:"work_period_id"` // Link to WorkPeriod
 	CreatedBy       uint      `json:"created_by"`
 	TransactionDate time.Time `json:"transaction_date"`
 }
@@ -130,6 +138,16 @@ type ProductSalesStat struct {
 	ProductName  string `json:"product_name"`
 	QuantitySold int    `gorm:"default:0" json:"quantity_sold"`
 	TotalRevenue int64  `gorm:"default:0" json:"total_revenue"`
+}
+
+// WorkPeriod represents a business day/shift
+// Çalışma dönemi (gün/vardiya)
+type WorkPeriod struct {
+	BaseModel
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
+	IsActive  bool       `gorm:"default:true" json:"is_active"`
+	ClosedBy  uint       `json:"closed_by"` // UserID
 }
 
 // HOOKS

@@ -13,23 +13,36 @@ import (
 type OrderService struct {
 	orderRepo       repositories.OrderRepository
 	transactionRepo repositories.TransactionRepository
+	workPeriodRepo  repositories.WorkPeriodRepository
 }
 
-func NewOrderService(orderRepo repositories.OrderRepository, txRepo repositories.TransactionRepository) *OrderService {
+func NewOrderService(orderRepo repositories.OrderRepository, txRepo repositories.TransactionRepository, wpRepo repositories.WorkPeriodRepository) *OrderService {
 	return &OrderService{
 		orderRepo:       orderRepo,
 		transactionRepo: txRepo,
+		workPeriodRepo:  wpRepo,
 	}
 }
 
 // CreateOrder initiates a new order
 // Yeni bir sipariş başlatır
 func (s *OrderService) CreateOrder(tableID *uint, waiterID uint, orderNumber string) (*models.Order, error) {
+	// Check for active work period
+	// Aktif çalışma dönemini kontrol et
+	period, err := s.workPeriodRepo.FindActivePeriod()
+	if err != nil {
+		return nil, err
+	}
+	if period == nil {
+		return nil, errors.New("shop is closed (no active work period)")
+	}
+
 	order := &models.Order{
-		TableID:     tableID,
-		WaiterID:    &waiterID,
-		OrderNumber: orderNumber,
-		Status:      "OPEN",
+		TableID:      tableID,
+		WaiterID:     &waiterID,
+		OrderNumber:  orderNumber,
+		Status:       "OPEN",
+		WorkPeriodID: period.ID,
 	}
 
 	if err := s.orderRepo.Create(order); err != nil {
@@ -82,6 +95,7 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 			Amount:          order.TotalAmount,
 			Description:     "Order #" + order.OrderNumber,
 			OrderID:         &order.ID,
+			WorkPeriodID:    order.WorkPeriodID, // Link transaction to the same period as order
 			TransactionDate: now,
 		}
 

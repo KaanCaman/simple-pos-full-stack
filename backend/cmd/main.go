@@ -27,9 +27,10 @@ func main() {
 	// 4. Initialize Repositories
 	orderRepo := gorm_repo.NewOrderRepository(database.DB)
 	transactionRepo := gorm_repo.NewTransactionRepository(database.DB)
+	workPeriodRepo := gorm_repo.NewWorkPeriodRepository(database.DB)
 
 	// 5. Initialize Services
-	orderService := services.NewOrderService(orderRepo, transactionRepo)
+	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo)
 	analyticsService := services.NewAnalyticsService(database.DB, transactionRepo)
 
 	// 6. Initialize Handlers

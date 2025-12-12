@@ -37,3 +37,12 @@ type TransactionRepository interface {
 	CreateWithTx(tx *gorm.DB, transaction *models.Transaction) error
 	FindDailyTotal(date time.Time, txType string) (int64, error)
 }
+
+// WorkPeriodRepository defines the interface for work period data access
+// Çalışma dönemi veri erişimi için arayüzü tanımlar
+type WorkPeriodRepository interface {
+	Create(period *models.WorkPeriod) error
+	FindActivePeriod() (*models.WorkPeriod, error)
+	Update(period *models.WorkPeriod) error
+	FindByID(id uint) (*models.WorkPeriod, error)
+}

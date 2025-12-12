@@ -54,9 +54,10 @@ func (s *AnalyticsService) GetDailyReport(date time.Time) (*models.DailyReport, 
 
 	for _, sale := range sales {
 		report.TotalSales += sale.Total
-		if sale.Method == "CASH" {
+		switch sale.Method {
+		case models.PaymentMethodCash:
 			report.CashSales += sale.Total
-		} else if sale.Method == "CREDIT_CARD" {
+		case models.PaymentMethodCreditCard:
 			report.PosSales += sale.Total
 		}
 	}
