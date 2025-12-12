@@ -17,6 +17,14 @@ type ProductRepository interface {
 	Delete(id uint) error
 }
 
+// UserRepository defines the interface for user data access
+// Kullanıcı veri erişimi için arayüzü tanımlar
+type UserRepository interface {
+	Create(user *models.User) error
+	FindByID(id uint) (*models.User, error)
+	FindAll() ([]models.User, error)
+}
+
 // OrderRepository defines the interface for order data access
 // Sipariş veri erişimi için arayüzü tanımlar
 type OrderRepository interface {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
 
@@ -12,9 +13,17 @@ import (
 type User struct {
 	BaseModel
 	Name     string `gorm:"size:100;not null" json:"name" validate:"required,min=2"`
-	PinCode  string `gorm:"size:255;not null" json:"-" validate:"required,numeric,len=4"` // Hashed ideally, simple string for now per prompt
+	PinCode  string `gorm:"size:255;not null" json:"-"` // Stores Bcrypt Hash
 	Role     string `gorm:"size:20;not null;default:'waiter'" json:"role" validate:"oneof=admin waiter"`
 	IsActive bool   `gorm:"default:true" json:"is_active"`
+}
+
+// JWTClaims represents the payload of the JWT
+// JWT içeriğini temsil eder
+type JWTClaims struct {
+	UserID uint   `json:"user_id"`
+	Role   string `json:"role"`
+	jwt.RegisteredClaims
 }
 
 // Category represents a product category

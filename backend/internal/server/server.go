@@ -36,7 +36,7 @@ func New(cfg *config.Config) *fiber.App {
 	app.Use(cors.New())
 
 	// 5. Register Routes (handles all dependency wiring)
-	routes.RegisterRoutes(app, database.DB)
+	routes.RegisterRoutes(app, database.DB, cfg)
 
 	log.Println("Server initialized in " + cfg.Environment + " mode")
 
