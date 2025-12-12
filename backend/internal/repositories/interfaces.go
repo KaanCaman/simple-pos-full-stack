@@ -62,6 +62,10 @@ type TransactionRepository interface {
 	// Mevcut bir veritabanı işlemi içinde bir işlem oluşturur
 	CreateWithTx(tx *gorm.DB, transaction *models.Transaction) error
 	FindDailyTotal(date time.Time, txType string) (int64, error)
+	FindAll(startDate, endDate time.Time, txType string) ([]models.Transaction, error)
+	Update(transaction *models.Transaction) error
+	Delete(id uint) error
+	FindByID(id uint) (*models.Transaction, error)
 }
 
 // WorkPeriodRepository defines the interface for work period data access

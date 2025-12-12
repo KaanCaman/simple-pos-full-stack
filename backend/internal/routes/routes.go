@@ -80,6 +80,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 
 	// Expense Management (Admin)
 	admin.Post("/transactions/expense", transactionHandler.AddExpense)
+	admin.Get("/transactions/expense", transactionHandler.ListExpenses)
+	admin.Put("/transactions/expense/:id", transactionHandler.UpdateExpense)
+	admin.Delete("/transactions/expense/:id", transactionHandler.DeleteExpense)
 
 	// Management Routes (Admin)
 	management := admin.Group("/management", middleware.RateLimiter(5, time.Minute))

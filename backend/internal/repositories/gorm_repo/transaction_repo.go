@@ -39,3 +39,33 @@ func (r *transactionRepository) FindDailyTotal(date time.Time, txType string) (i
 
 	return total, err
 }
+
+func (r *transactionRepository) FindAll(startDate, endDate time.Time, txType string) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	query := r.db.Model(&models.Transaction{}).Where("created_at >= ? AND created_at <= ?", startDate, endDate)
+
+	if txType != "" {
+		query = query.Where("type = ?", txType)
+	}
+
+	err := query.Order("created_at desc").Find(&transactions).Error
+	return transactions, err
+}
+
+func (r *transactionRepository) Update(transaction *models.Transaction) error {
+	return r.db.Save(transaction).Error
+}
+
+func (r *transactionRepository) Delete(id uint) error {
+	// Soft delete
+	return r.db.Delete(&models.Transaction{}, id).Error
+}
+
+func (r *transactionRepository) FindByID(id uint) (*models.Transaction, error) {
+	var transaction models.Transaction
+	err := r.db.First(&transaction, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &transaction, nil
+}

@@ -3,7 +3,7 @@ package handlers
 import (
 	"simple-pos/internal/middleware"
 	"simple-pos/internal/services"
-	"simple-pos/pkg/constants"
+	"simple-pos/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -32,10 +32,12 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.service.Login(req.UserID, req.Pin)
+	token, err := h.service.Login(req.UserID, req.Pin) // Corrected req.PIN to req.Pin
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnauthorized, err.Error())
+		return utils.BadRequestError(c, utils.CodeUnauthorized, "Invalid credentials")
 	}
 
-	return middleware.SuccessResponse(c, constants.CODE_SUCCESS, "Login successful", LoginResponse{Token: token})
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Login successful", fiber.Map{
+		"token": token,
+	})
 }
