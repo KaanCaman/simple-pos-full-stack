@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"log"
@@ -8,18 +8,21 @@ import (
 	"simple-pos/internal/platform/database"
 	"simple-pos/internal/repositories/gorm_repo"
 	"simple-pos/internal/services"
+	"simple-pos/pkg/config"
 	"simple-pos/pkg/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-func main() {
+// New initializes the application server with the given configuration
+// Verilen yapılandırma ile uygulama sunucusunu başlatır
+func New(cfg *config.Config) *fiber.App {
 	// 1. Initialize Logger
 	logger.InitLogger()
 
 	// 2. Connect Database
-	database.Connect()
+	database.Connect(cfg.DBPath)
 
 	// 3. Migrate Database
 	database.Migrate()
@@ -32,10 +35,12 @@ func main() {
 	// 5. Initialize Services
 	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo)
 	analyticsService := services.NewAnalyticsService(database.DB, transactionRepo)
+	managementService := services.NewManagementService(workPeriodRepo, orderRepo, database.DB)
 
 	// 6. Initialize Handlers
 	orderHandler := handlers.NewOrderHandler(orderService)
 	analyticsHandler := handlers.NewAnalyticsHandler(analyticsService)
+	managementHandler := handlers.NewManagementHandler(managementService)
 
 	// 7. Setup Fiber
 	app := fiber.New(fiber.Config{
@@ -64,6 +69,12 @@ func main() {
 	analytics := v1.Group("/analytics")
 	analytics.Get("/daily", analyticsHandler.GetDailyReport)
 
-	logger.Info("Server starting on port 3000...")
-	log.Fatal(app.Listen(":3000"))
+	// Management Routes
+	management := v1.Group("/management")
+	management.Post("/start-day", managementHandler.StartDay)
+	management.Post("/end-day", managementHandler.EndDay)
+
+	log.Println("Server initialized in " + cfg.Environment + " mode")
+
+	return app
 }
