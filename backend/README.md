@@ -1,34 +1,67 @@
-# Tostçu POS Backend
+# Simple POS Backend
 
-Robust, scalable, and secure POS (Point of Sale) backend system designed for fast-food businesses. Built with Go (Golang), Fiber, and SQLite to ensure high performance and reliability.
+A robust, production-ready backend system designed for the fast-paced environment of small food businesses (kiosks, cafes). It manages the entire lifecycle of a business day, from opening the shutter to closing the register.
 
-## 🚀 Features
+## 📖 Real-World Scenario: A Day at "Tostçu Kaan Usta"
 
-### core Functionalities
+To understand the capabilities of this system, let's look at a typical day:
 
-- **Order Management**:
-  - Open, Modify (Add/Remove items), and Close orders via REST API.
-  - **ACID Transactions**: Ensures data integrity when closing orders and recording financial data.
-  - **Dynamic Totals**: Automatically recalculates order totals using GORM hooks.
-- **Menu Management**:
-  - Manage Categories and Products.
-  - Efficient filtering and retrieval.
-- **Financial & Expense Management**:
-  - **Daily Reports**: Automated calculation of Total Sales, Cash/POS split, and Net Profit.
-  - **Expense Tracking**: Full CRUD support for manual expenses (e.g., bills, supplies).
-- **User Management**:
-  - Role-Based Access Control (RBAC): Admin vs. Waiter roles.
-  - Secure PIN-based Login (Bcrypt hashing + JWT).
+### 1. 🌅 Opening the Shop (Vardiya Başlatma)
 
-### 🛠 Technical Highlights
+**Scenario**: You arrive at 08:00 AM.
 
-- **Architecture**: Follows **SOLID** principles, utilizing **Repository Pattern** and **Service Layer** for Clean Architecture.
-- **Database**: **SQLite** with **GORM** (ORM), configured with **WAL Mode** for high concurrency.
-- **Soft Deletes**: Data is never physically removed; `gorm.DeletedAt` is used for auditing and safety.
-- **Logging**: High-performance structured logging with **Zap** and **Lumberjack** (Log rotation support).
-- **Security**:
-  - Strict input validation using `go-playground/validator`.
-  - Panic Recovery Middleware.
+- **Action**: Login as Admin and click **"Start Day"**.
+- **System**: Creates a new `WorkPeriod`. From this moment, all sales and expenses are tracked within this specific shift.
+- **Status**: Shop is now **OPEN**.
+
+### 2. 👨‍🍳 Staff Login
+
+**Scenario**: Your waiter, Ali, arrives.
+
+- **Action**: Ali logs in with his **4-digit PIN**.
+- **Security**: As a waiter, he can manage tables and orders but cannot access financial reports or sensitive admin settings.
+
+### 3. 📝 Taking Orders (Sipariş Yönetimi)
+
+**Scenario**: A customer sits at **Table 1** and orders a "Mixed Toast" and "Large Ayran".
+
+- **Action**: Ali selects Table 1 -> Adds items from the menu -> Clicks "Send".
+- **System**:
+  - Creates an `Order` with status `OPEN`.
+  - Marks Table 1 as `OCCUPIED`.
+  - Kitchen receives the order instantly.
+- **Dynamics**: Customer asks for another Ayran? Ali simply updates the quantity. The total updates dynamically (e.g., 150 TL -> 180 TL).
+
+### 4. 💸 Managing Expenses (Gider Takibi)
+
+**Scenario**: You run out of dish soap during the rush. You buy one from the market for 50 TL cash.
+
+- **Problem**: Cash left the drawer, but no sale was made.
+- **Action**: Admin records a new **Expense**: "Cleaning Supplies", 50 TL, Cash.
+- **System**: This amount is deducted from the day's **Net Profit** calculation.
+
+### 5. 💳 Closing & Payment
+
+**Scenario**: Table 1 asks for the bill. They pay via Credit Card.
+
+- **Action**: Ali selects "Close Order" -> Choose "Credit Card".
+- **System**:
+  - Order status becomes `COMPLETED`.
+  - Table 1 becomes `AVAILABLE` again.
+  - Revenue is recorded under "POS Sales".
+
+### 6. 🌙 Closing the Shop (Z Raporu)
+
+**Scenario**: It's closing time. You want to see how much you earned.
+
+- **Action**: Admin clicks **"End Day"**.
+- **System Generates Z-Report**:
+  - **Total Sales**: 5,000 TL
+  - **Expenses**: -50 TL
+  - **Net Profit**: 4,950 TL
+- **Status**: Shift is closed. The system allows no more sales until the next day starts.
+
+---
 
 ### 📐 Development Guidelines
 
@@ -55,121 +88,62 @@ Every API response follows this strict contract:
 }
 ```
 
-This consistency allows the frontend to have a single, robust `apiClient` interceptor for error handling and success messages.
+## This consistency allows the frontend to have a single, robust `apiClient` interceptor for error handling and success messages.
 
-## 🧰 Tech Stack
+## 🧪 Testing Philosophy (E2E)
 
-- **Language**: Go 1.24+
-- **Framework**: [Fiber v2](https://gofiber.io/) (Fastest Go Web Framework)
-- **Database**: SQLite3
-- **ORM**: [GORM](https://gorm.io/)
-- **Logging**: [Zap](https://github.com/uber-go/zap)
-- **Validation**: Validator v10
+Reliability is non-negotiable for a POS system. We don't just test functions; we test **flows**.
 
-## 📂 Project Structure
+### End-to-End (E2E) Test Suite
 
-```
-backend/
-├── cmd/
-│   ├── api/            # Main entry point (server)
-│   └── seed/           # Database seeder script
-├── internal/
-│   ├── handlers/       # HTTP Handlers (Controllers)
-│   ├── middleware/     # Auth, Logging, Recovery Middleware
-│   ├── models/         # Database Models (Entitites)
-│   ├── repositories/   # Data Access Layer (Interfaces & GORM implementations)
-│   ├── routes/         # Route definitions and wiring
-│   └── services/       # Business Logic Layer
-├── pkg/
-│   ├── config/         # Configuration loader
-│   ├── constants/      # App-wide constants (Error codes)
-│   ├── logger/         # Structured logger setup
-│   └── utils/          # Shared utilities (JWT, Responses)
-└── logs/               # Application logs (Auto-rotated)
-```
+The `tests/e2e/e2e_test.go` suite simulates the exact scenario above, running against a real SQLite database.
 
-## ⚡️ Setup & Installation
+**The Test Flow:**
 
-### Prerequisites
+1.  **Auth**: Admin logs in, gets JWT.
+2.  **Start Day**: API call to open a new work period.
+3.  **User Cycle**: Create Waiter -> Update Profile -> Change PIN -> Delete User.
+4.  **Menu Cycle**: Create Category -> Create Product -> Update Price.
+5.  **Order Cycle**:
+    - Open Order for Table.
+    - Add Items -> Update Quantity -> Remove Item.
+    - **Strict Check**: Verify order total calculation.
+    - Close Order with Payment (CASH).
+6.  **Expense Cycle**: Add manual expense -> Verify it links to the active Work Period.
+7.  **End Day**: Close shift.
+8.  **Verification**:
+    - **Z-Report Check**: Does (Sales - Expenses) = Net Profit?
+    - **Data Integerity**: Are all records status correct?
 
-- Go 1.24 or higher
-- Git
+### 📂 Test Logs
 
-### 1. Clone the Repository
+We separate test outputs to keep things clean:
 
-```bash
-git clone <repository-url>
-cd simple-pos-full-stack/backend
-```
-
-### 2. Configuration
-
-Create a `.env` file in the root directory:
-
-```env
-PORT=3000
-DB_PATH=./tostcu.db
-JWT_SECRET=your-super-secret-key-change-this
-LOG_FILE_PATH=./logs/tostcu-pos.log
-```
-
-### 3. Install Dependencies
-
-```bash
-go mod tidy
-```
-
-### 4. Seed Database (Optional)
-
-Populate the database with default Categories, Products, and Admin User:
-
-```bash
-go run cmd/seed/main.go
-# Admin Login -> UserID: 1, PIN: 1234
-```
-
-### 5. Run Server
-
-```bash
-go run cmd/api/main.go
-```
-
-The server will start at `http://localhost:3000`.
-
-## 📡 API Documentation
-
-### Authentication
-
-| Method | Endpoint      | Description              | Auth Required |
-| :----- | :------------ | :----------------------- | :------------ |
-| `POST` | `/auth/login` | Login with User ID & PIN | No            |
-
-### Orders
-
-| Method   | Endpoint                           | Description           | Auth Required |
-| :------- | :--------------------------------- | :-------------------- | :------------ |
-| `POST`   | `/api/v1/orders`                   | Create a new Order    | Yes           |
-| `POST`   | `/api/v1/orders/:id/items`         | Add Item to Order     | Yes           |
-| `PUT`    | `/api/v1/orders/:id/items/:itemId` | Update Item Quantity  | Yes           |
-| `DELETE` | `/api/v1/orders/:id/items/:itemId` | Remove Item           | Yes           |
-| `POST`   | `/api/v1/orders/:id/close`         | Close Order (Payment) | Yes           |
-
-### Transactions (Expenses)
-
-| Method   | Endpoint                           | Description    | Auth Required |
-| :------- | :--------------------------------- | :------------- | :------------ |
-| `GET`    | `/api/v1/transactions/expense`     | List Expenses  | Admin         |
-| `POST`   | `/api/v1/transactions/expense`     | Create Expense | Admin         |
-| `PUT`    | `/api/v1/transactions/expense/:id` | Update Expense | Admin         |
-| `DELETE` | `/api/v1/transactions/expense/:id` | Delete Expense | Admin         |
-
-### Management
-
-| Method | Endpoint                       | Description                | Auth Required |
-| :----- | :----------------------------- | :------------------------- | :------------ |
-| `POST` | `/api/v1/management/start-day` | Start Work Period          | Admin         |
-| `GET`  | `/api/v1/analytics/daily`      | Get Daily Financial Report | Admin         |
+- **Console**: Minimal output (Step progress).
+- **File (`tests/e2e/logs/test-output.log`)**: Detailed HTTP Request/Response logs for every step, useful for debugging.
 
 ---
 
-Developed with by [kaancaman](https://github.com/kaancaman)
+## 🛠 Technical Stack
+
+- **Language**: Go (Golang)
+- **Framework**: Fiber v2 (High Performance)
+- **Database**: SQLite with GORM (WAL Mode enabled for concurrency)
+- **Architecture**: Clean Architecture (Handler -> Service -> Repository)
+- **Security**: JWT Auth + BCrypt PIN Hashing + Input Validation
+
+## 🚀 Setup
+
+1.  **Clone & Install**:
+    ```bash
+    git clone <repo>
+    go mod tidy
+    ```
+2.  **Run Tests**:
+    ```bash
+    go test -v ./tests/e2e/...
+    ```
+3.  **Start Server**:
+    ```bash
+    go run cmd/api/main.go
+    ```
