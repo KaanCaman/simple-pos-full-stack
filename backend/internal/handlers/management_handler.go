@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"simple-pos/internal/services"
-	"simple-pos/pkg/logger"
+	"simple-pos/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,15 +24,14 @@ type WorkPeriodRequest struct {
 func (h *ManagementHandler) StartDay(c *fiber.Ctx) error {
 	var req WorkPeriodRequest
 	if err := c.BodyParser(&req); err != nil {
-		logger.Error("Invalid request body", logger.Err(err))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid request body")
 	}
 
 	if err := h.service.StartDay(req.UserID); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return utils.BadRequestError(c, utils.CodeTransactionFailed, err.Error())
 	}
 
-	return c.JSON(fiber.Map{"message": "Work period started successfully"})
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Work period started successfully", nil)
 }
 
 // EndDay handles the end day request
@@ -40,17 +39,15 @@ func (h *ManagementHandler) StartDay(c *fiber.Ctx) error {
 func (h *ManagementHandler) EndDay(c *fiber.Ctx) error {
 	var req WorkPeriodRequest
 	if err := c.BodyParser(&req); err != nil {
-		logger.Error("Invalid request body", logger.Err(err))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid request body")
 	}
 
 	report, err := h.service.EndDay(req.UserID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return utils.BadRequestError(c, utils.CodeTransactionFailed, err.Error())
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "Work period ended successfully",
-		"report":  report,
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Work period ended successfully", fiber.Map{
+		"report": report,
 	})
 }
