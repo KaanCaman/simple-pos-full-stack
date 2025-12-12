@@ -27,6 +27,14 @@ func (r *userRepository) FindByID(id uint) (*models.User, error) {
 	return &user, nil
 }
 
+func (r *userRepository) FindByUsername(username string) (*models.User, error) {
+	var user models.User
+	if err := r.db.Where("name = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (r *userRepository) FindAll() ([]models.User, error) {
 	var users []models.User
 	if err := r.db.Find(&users).Error; err != nil {

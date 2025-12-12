@@ -125,8 +125,8 @@ func TestE2E_FullFlow(t *testing.T) {
 
 	t.Run("1_Auth_Login", func(t *testing.T) {
 		payload := map[string]interface{}{
-			"user_id": 1,
-			"pin":     adminPin,
+			"username": adminUser,
+			"password": adminPin,
 		}
 		resp, code := logAndRequest(t, "Admin Login", "POST", "/auth/login", payload, "")
 		require.Equal(t, http.StatusOK, code)

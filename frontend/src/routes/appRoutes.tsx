@@ -1,6 +1,7 @@
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { RouteLogger } from "../components/RouteLogger";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { LoginPage } from "../features/auth/components/LoginPage";
 
 // Root layout component that includes global providers/components.
 // Küresel sağlayıcıları/bileşenleri içeren kök düzen bileşeni.
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
     path: "/",
     element: <RootLayout />,
     children: [
+      {
+        path: "login",
+        element: <LoginPage />,
+      },
       {
         index: true,
         element: <div>Welcome to Tostçu POS</div>, // Temporary placeholder

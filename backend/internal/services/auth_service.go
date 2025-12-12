@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
 	"simple-pos/pkg/logger"
 	"simple-pos/pkg/utils"
@@ -19,27 +20,32 @@ func NewAuthService(userRepo repositories.UserRepository) *AuthService {
 	}
 }
 
-// Login verifies PIN and returns JWT token
-// PIN'i doğrular ve JWT token döner
-func (s *AuthService) Login(userID uint, pin string) (string, error) {
-	// 1. Find User
-	user, err := s.userRepo.FindByID(userID)
+// Login verifies Password and returns JWT token
+// Şifreyi doğrular ve JWT token döner
+func (s *AuthService) Login(username string, password string) (user *models.User, token string, err error) {
+	// 1. Find User by Username
+	user, err = s.userRepo.FindByUsername(username)
 	if err != nil {
-		logger.Warn("Login failed: User not found", logger.Int("user_id", int(userID)))
-		return "", errors.New("invalid credentials")
+		logger.Warn("Login failed: User not found", logger.String("username", username))
+		return nil, "", errors.New("invalid credentials")
 	}
 
 	if !user.IsActive {
-		logger.Warn("Login failed: User is inactive", logger.Int("user_id", int(userID)))
-		return "", errors.New("account is disabled")
+		logger.Warn("Login failed: User is inactive", logger.String("username", username))
+		return nil, "", errors.New("account is disabled")
 	}
 
-	// 2. Verify PIN (Hash)
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PinCode), []byte(pin)); err != nil {
-		logger.Warn("Login failed: Invalid PIN", logger.Int("user_id", int(userID)))
-		return "", errors.New("invalid credentials")
+	// 2. Verify Password (Hash) - originally PinCode
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PinCode), []byte(password)); err != nil {
+		logger.Warn("Login failed: Invalid Password", logger.String("username", username))
+		return nil, "", errors.New("invalid credentials")
 	}
 
 	// 3. Generate JWT
-	return utils.GenerateToken(user.ID, user.Role)
+	token, err = utils.GenerateToken(user.ID, user.Role)
+	if err != nil {
+		logger.Warn("Login failed: Token generation failed", logger.String("username", username))
+		return nil, "", errors.New("token generation failed")
+	}
+	return user, token, nil
 }

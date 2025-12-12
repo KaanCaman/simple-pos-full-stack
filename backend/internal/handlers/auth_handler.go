@@ -17,12 +17,14 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 }
 
 type LoginRequest struct {
-	UserID uint   `json:"user_id" validate:"required"`
-	Pin    string `json:"pin" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token  string `json:"token"`
+	Role   string `json:"role"`
+	UserID int    `json:"userID"`
 }
 
 // Login handles user authentication
@@ -32,12 +34,14 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	token, err := h.service.Login(req.UserID, req.Pin) // Corrected req.PIN to req.Pin
+	user, token, err := h.service.Login(req.Username, req.Password)
 	if err != nil {
 		return utils.BadRequestError(c, utils.CodeUnauthorized, "Invalid credentials")
 	}
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Login successful", fiber.Map{
-		"token": token,
+		"token":  token,
+		"role":   user.Role,
+		"userID": user.ID,
 	})
 }
