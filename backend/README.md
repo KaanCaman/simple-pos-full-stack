@@ -87,8 +87,7 @@ Every API response follows this strict contract:
   "data": { ... }              // Optional payload
 }
 ```
-
-## This consistency allows the frontend to have a single, robust `apiClient` interceptor for error handling and success messages.
+- This consistency allows the frontend to have a single, robust `apiClient` interceptor for error handling and success messages.
 
 ## 🧪 Testing Philosophy (E2E)
 
