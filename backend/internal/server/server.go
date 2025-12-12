@@ -17,7 +17,7 @@ import (
 // Verilen yapılandırma ile uygulama sunucusunu başlatır
 func New(cfg *config.Config) *fiber.App {
 	// 1. Initialize Logger
-	logger.InitLogger()
+	logger.InitLogger(cfg)
 
 	// 2. Connect Database
 	database.Connect(cfg.DBPath)
@@ -31,8 +31,9 @@ func New(cfg *config.Config) *fiber.App {
 	})
 
 	// Middleware
+	app.Use(middleware.RequestLoggerMiddleware()) // Log every request
+	app.Use(middleware.RecoveryMiddleware())      // Recover from panics with Zap
 	app.Use(cors.New())
-	app.Use(middleware.RecoverMiddleware())
 
 	// 5. Register Routes (handles all dependency wiring)
 	routes.RegisterRoutes(app, database.DB)

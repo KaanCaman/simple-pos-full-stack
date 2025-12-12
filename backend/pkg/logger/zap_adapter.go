@@ -2,9 +2,12 @@ package logger
 
 import (
 	"os"
+	"path/filepath"
+	"simple-pos/pkg/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // zapLogger implements Logger interface using Zap
@@ -15,17 +18,46 @@ type zapLogger struct {
 
 // newZapLogger creates a new Zap logger instance
 // Yeni bir Zap logger örneği oluşturur
-func newZapLogger() Logger {
-	config := zap.NewProductionEncoderConfig()
-	config.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.EncodeLevel = zapcore.CapitalLevelEncoder
+func newZapLogger(cfg *config.Config) Logger {
+	// 1. Ensure log directory exists
+	// Log dizini varlığını kontrol et
+	if err := os.MkdirAll(filepath.Dir(cfg.LogFilePath), 0755); err != nil {
+		panic("failed to create log directory: " + err.Error())
+	}
 
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(config),
-		zapcore.Lock(os.Stdout),
-		zapcore.InfoLevel,
+	// 2. Configure Encoder (Console - Human Readable)
+	// Console için encoder ayarları
+	consoleEncoderConfig := zap.NewProductionEncoderConfig()
+	consoleEncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	consoleEncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	consoleEncoder := zapcore.NewConsoleEncoder(consoleEncoderConfig)
+
+	// 3. Configure Encoder (File - JSON Structured)
+	// Dosya için encoder ayarları
+	fileEncoderConfig := zap.NewProductionEncoderConfig()
+	fileEncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	fileEncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	fileEncoder := zapcore.NewJSONEncoder(fileEncoderConfig)
+
+	// 4. Configure File Write Syncer (Lumberjack Rotation)
+	// Dosya yazma senkronizasyonu (Lumberjack rotation)
+	fileWriter := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   cfg.LogFilePath,
+		MaxSize:    10, // megabytes
+		MaxBackups: 5,
+		MaxAge:     30,   // days
+		Compress:   true, // disabled by default
+	})
+
+	// 5. Create Cores
+	// Core'ları oluştur
+	core := zapcore.NewTee(
+		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapcore.InfoLevel),
+		zapcore.NewCore(fileEncoder, fileWriter, zapcore.InfoLevel),
 	)
 
+	// 6. Create Logger
+	// Logger'ı oluştur
 	l := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(2)) // Skip 2 levels (wrapper + global func)
 
 	return &zapLogger{logger: l}
