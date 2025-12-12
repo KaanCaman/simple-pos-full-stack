@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"simple-pos/internal/middleware"
 	"simple-pos/internal/services"
-	"simple-pos/pkg/constants"
+	"simple-pos/pkg/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -26,15 +25,16 @@ func (h *AnalyticsHandler) GetDailyReport(c *fiber.Ctx) error {
 	if dateStr != "" {
 		parsedDate, err := time.Parse("2006-01-02", dateStr)
 		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, "Invalid date format (use YYYY-MM-DD)")
+			return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid date format (use YYYY-MM-DD)")
 		}
 		targetDate = parsedDate
 	}
 
 	report, err := h.service.GetDailyReport(targetDate)
 	if err != nil {
-		return err
+		// assuming service returns error on internal failure
+		return utils.InternalError(c, utils.CodeInternalError, err.Error())
 	}
 
-	return middleware.SuccessResponse(c, constants.CODE_SUCCESS, "Daily report retrieved", report)
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Daily report retrieved", report)
 }

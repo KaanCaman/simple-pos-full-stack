@@ -1,11 +1,15 @@
 package logger
 
+import (
+	"simple-pos/pkg/config"
+)
+
 var globalLogger Logger
 
 // InitLogger initializes the global logger with the default adapter (Zap)
 // Loglayıcıyı başlatır
-func InitLogger() {
-	globalLogger = newZapLogger()
+func InitLogger(cfg *config.Config) {
+	globalLogger = newZapLogger(cfg)
 	globalLogger.Info("Logger initialized successfully")
 }
 

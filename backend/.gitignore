@@ -52,6 +52,7 @@ go.sum
 # ----------------------------
 .env
 .env.*
+!.env.example
 *.key
 *.pem
 

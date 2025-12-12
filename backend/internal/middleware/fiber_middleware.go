@@ -46,11 +46,12 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 	if errors.As(err, &e) {
 		code = e.Code
 		message = e.Message
-		if code == fiber.StatusNotFound {
+		switch code {
+		case fiber.StatusNotFound:
 			appCode = constants.CODE_NOT_FOUND
-		} else if code == fiber.StatusForbidden {
+		case fiber.StatusForbidden:
 			appCode = constants.CODE_FORBIDDEN
-		} else if code == fiber.StatusUnauthorized {
+		case fiber.StatusUnauthorized:
 			appCode = constants.CODE_UNAUTHORIZED
 		}
 	}

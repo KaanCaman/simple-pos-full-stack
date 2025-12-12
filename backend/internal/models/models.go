@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
 
@@ -12,9 +13,17 @@ import (
 type User struct {
 	BaseModel
 	Name     string `gorm:"size:100;not null" json:"name" validate:"required,min=2"`
-	PinCode  string `gorm:"size:255;not null" json:"-" validate:"required,numeric,len=4"` // Hashed ideally, simple string for now per prompt
+	PinCode  string `gorm:"size:255;not null" json:"-"` // Stores Bcrypt Hash
 	Role     string `gorm:"size:20;not null;default:'waiter'" json:"role" validate:"oneof=admin waiter"`
 	IsActive bool   `gorm:"default:true" json:"is_active"`
+}
+
+// JWTClaims represents the payload of the JWT
+// JWT içeriğini temsil eder
+type JWTClaims struct {
+	UserID uint   `json:"user_id"`
+	Role   string `json:"role"`
+	jwt.RegisteredClaims
 }
 
 // Category represents a product category
@@ -66,11 +75,18 @@ const (
 	OrderStatusCancelled = "cancelled"
 )
 
+// Payment Method Enum
+const (
+	PaymentMethodCash       = "CASH"
+	PaymentMethodCreditCard = "CREDIT_CARD"
+)
+
 // Order represents a customer order
 // Müşteri siparişi
 type Order struct {
 	BaseModel
 	OrderNumber   string      `gorm:"size:50;uniqueIndex;not null" json:"order_number"` // UUID or Generated
+	WorkPeriodID  uint        `gorm:"index" json:"work_period_id"`                      // Link to WorkPeriod
 	TableID       *uint       `json:"table_id"`
 	WaiterID      *uint       `json:"waiter_id"`
 	Status        string      `gorm:"size:20;default:'open'" json:"status" validate:"oneof=open completed cancelled"`
@@ -104,6 +120,7 @@ type Transaction struct {
 	Amount          int64     `gorm:"not null" json:"amount"`
 	Description     string    `json:"description"`
 	OrderID         *uint     `json:"order_id"`
+	WorkPeriodID    uint      `gorm:"index" json:"work_period_id"` // Link to WorkPeriod
 	CreatedBy       uint      `json:"created_by"`
 	TransactionDate time.Time `json:"transaction_date"`
 }
@@ -130,6 +147,16 @@ type ProductSalesStat struct {
 	ProductName  string `json:"product_name"`
 	QuantitySold int    `gorm:"default:0" json:"quantity_sold"`
 	TotalRevenue int64  `gorm:"default:0" json:"total_revenue"`
+}
+
+// WorkPeriod represents a business day/shift
+// Çalışma dönemi (gün/vardiya)
+type WorkPeriod struct {
+	BaseModel
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
+	IsActive  bool       `gorm:"default:true" json:"is_active"`
+	ClosedBy  uint       `json:"closed_by"` // UserID
 }
 
 // HOOKS
@@ -195,4 +222,12 @@ func (item *OrderItem) AfterSave(tx *gorm.DB) (err error) {
 	// Basit tutar = toplam tutar (şimdiye kadar dahil edilmiş vergi veya 0 vergi için basit tutar)
 
 	return tx.Save(&order).Error
+}
+
+// AfterDelete for OrderItem: Recalculate Order Totals
+// Sipariş kalemi için AfterDelete: Sipariş toplam tutarını yeniden hesapla
+func (item *OrderItem) AfterDelete(tx *gorm.DB) (err error) {
+	// Re-calculate the Order Total logic is same as AfterSave
+	// Just call AfterSave or duplicate logic. Let's duplicate for clarity and safety.
+	return item.AfterSave(tx)
 }

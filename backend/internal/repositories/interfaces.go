@@ -13,7 +13,28 @@ type ProductRepository interface {
 	Create(product *models.Product) error
 	FindAll() ([]models.Product, error)
 	FindByID(id uint) (*models.Product, error)
+	FindByCategoryID(categoryID uint) ([]models.Product, error)
 	Update(product *models.Product) error
+	Delete(id uint) error
+}
+
+// CategoryRepository defines the interface for category data access
+// Kategori veri erişimi için arayüzü tanımlar
+type CategoryRepository interface {
+	Create(category *models.Category) error
+	FindAll() ([]models.Category, error)
+	FindByID(id uint) (*models.Category, error)
+	Update(category *models.Category) error
+	Delete(id uint) error
+}
+
+// UserRepository defines the interface for user data access
+// Kullanıcı veri erişimi için arayüzü tanımlar
+type UserRepository interface {
+	Create(user *models.User) error
+	FindByID(id uint) (*models.User, error)
+	FindAll() ([]models.User, error)
+	Update(user *models.User) error
 	Delete(id uint) error
 }
 
@@ -23,6 +44,13 @@ type OrderRepository interface {
 	Create(order *models.Order) error
 	FindByID(id uint) (*models.Order, error)
 	Update(order *models.Order) error
+
+	// Item Management
+	AddItem(item *models.OrderItem) error
+	UpdateItem(item *models.OrderItem) error
+	DeleteItem(item *models.OrderItem) error
+	FindItem(itemID uint) (*models.OrderItem, error)
+
 	// WithTransaction runs a function within a database transaction
 	// Bir veritabanı işlemi içinde bir fonksiyon çalıştırır
 	WithTransaction(fn func(tx *gorm.DB) error) error
@@ -36,4 +64,27 @@ type TransactionRepository interface {
 	// Mevcut bir veritabanı işlemi içinde bir işlem oluşturur
 	CreateWithTx(tx *gorm.DB, transaction *models.Transaction) error
 	FindDailyTotal(date time.Time, txType string) (int64, error)
+	FindAll(startDate, endDate time.Time, txType string) ([]models.Transaction, error)
+	Update(transaction *models.Transaction) error
+	Delete(id uint) error
+	FindByID(id uint) (*models.Transaction, error)
+}
+
+// WorkPeriodRepository defines the interface for work period data access
+// Çalışma dönemi veri erişimi için arayüzü tanımlar
+type WorkPeriodRepository interface {
+	Create(period *models.WorkPeriod) error
+	FindActivePeriod() (*models.WorkPeriod, error)
+	Update(period *models.WorkPeriod) error
+	FindByID(id uint) (*models.WorkPeriod, error)
+}
+
+// TableRepository defines the interface for table data access
+// Masa veri erişimi için arayüzü tanımlar
+type TableRepository interface {
+	Create(table *models.Table) error
+	FindAll() ([]models.Table, error)
+	FindByID(id uint) (*models.Table, error)
+	Update(table *models.Table) error
+	Delete(id uint) error
 }

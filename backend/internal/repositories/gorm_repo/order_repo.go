@@ -27,10 +27,44 @@ func (r *orderRepository) FindByID(id uint) (*models.Order, error) {
 	return &order, nil
 }
 
+// Update an order
+// Siparişi günceller
 func (r *orderRepository) Update(order *models.Order) error {
 	return r.db.Save(order).Error
 }
 
+// AddItem adds an item to order
+// Siparişe ürün ekler
+func (r *orderRepository) AddItem(item *models.OrderItem) error {
+	return r.db.Create(item).Error
+}
+
+// UpdateItem updates an order item
+// Sipariş kalemini günceller
+func (r *orderRepository) UpdateItem(item *models.OrderItem) error {
+	return r.db.Save(item).Error
+}
+
+// DeleteItem removes an order item
+// Sipariş kalemini siler
+func (r *orderRepository) DeleteItem(item *models.OrderItem) error {
+	// Unscoped to allow hard delete if preferred, or soft delete.
+	// Models have DeletedAt, so this will be soft delete.
+	// Hooks (AfterDelete) will run.
+	return r.db.Delete(item).Error
+}
+
+// FindItem finds an order item
+// Sipariş kalemini bulur
+func (r *orderRepository) FindItem(itemID uint) (*models.OrderItem, error) {
+	var item models.OrderItem
+	if err := r.db.First(&item, itemID).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+// WithTransaction runs a function within a database transaction
 func (r *orderRepository) WithTransaction(fn func(tx *gorm.DB) error) error {
 	return r.db.Transaction(fn)
 }

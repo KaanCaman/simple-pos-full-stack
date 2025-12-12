@@ -14,12 +14,12 @@ var DB *gorm.DB
 
 // Connect initializes the database connection
 // Veritabanı bağlantısını başlatır
-func Connect() {
+func Connect(dbPath string) {
 	var err error
 
 	// Open SQLite connection
 	// SQLite bağlantısını açar
-	DB, err = gorm.Open(sqlite.Open("tostcu.db"), &gorm.Config{
+	DB, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	// Error check
@@ -53,6 +53,7 @@ func Migrate() {
 		&models.Transaction{},
 		&models.DailyReport{},
 		&models.ProductSalesStat{},
+		&models.WorkPeriod{},
 	)
 	// Error check
 	// Hata kontrolü
