@@ -60,10 +60,10 @@ export const LoginPage = observer(() => {
     // Validate input using Zod.
     const result = loginSchema.safeParse({ username, password });
     if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
+      const treeError = z.treeifyError(result.error);
       setErrors({
-        username: fieldErrors.username?.[0],
-        password: fieldErrors.password?.[0],
+        username: treeError.properties?.username?.errors?.[0],
+        password: treeError.properties?.password?.errors?.[0],
       });
       return;
     }

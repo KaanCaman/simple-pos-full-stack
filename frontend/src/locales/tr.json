@@ -7,7 +7,29 @@
     "delete": "Sil",
     "edit": "Düzenle",
     "add": "Ekle",
-    "search": "Ara..."
+    "search": "Ara...",
+    "search_placeholder": "Menü veya masa ara..."
+  },
+  "dashboard": {
+    "menu": {
+      "dashboard": "Panel",
+      "history": "Geçmiş",
+      "settings": "Ayarlar"
+    },
+    "stats": {
+      "total_tables": "Toplam Masa",
+      "occupied": "Dolu",
+      "available": "Boş"
+    },
+    "table_status": {
+      "dining": "Yemekte",
+      "locked": "Kilitli",
+      "available": "Boş"
+    },
+    "floor": {
+      "ground": "Zemin Kat",
+      "terrace": "Teras"
+    }
   },
   "auth": {
     "login": "Giriş Yap",
