@@ -5,8 +5,12 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 import "./i18n"; // Initialize i18n
 
+import { ThemeProvider } from "./providers/ThemeProvider";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </StrictMode>
 );

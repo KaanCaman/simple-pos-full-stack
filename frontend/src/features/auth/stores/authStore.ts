@@ -4,6 +4,7 @@ import { RootStore } from "../../../stores/rootStore";
 import { logger } from "../../../utils/logger";
 import type { ApiResponse } from "../../../types/api";
 import type { User, LoginResponseData, UserRole } from "../../../types/auth";
+import { AppEndPoints } from "../../../constants/app";
 
 export class AuthStore {
   @observable user: User | null = null;
@@ -18,6 +19,11 @@ export class AuthStore {
     this.rootStore = rootStore;
     makeObservable(this);
     this.loadToken();
+
+    // Register callback to handle token expiry (401)
+    api.setOnUnauthorized(() => {
+      this.logout();
+    });
   }
 
   // Load token from local storage on initialization.
@@ -40,7 +46,7 @@ export class AuthStore {
     this.error = null;
     try {
       const response = await api.post<ApiResponse<LoginResponseData>>(
-        "/auth/login",
+        `${AppEndPoints.LOGIN}`,
         { username, password }
       );
 

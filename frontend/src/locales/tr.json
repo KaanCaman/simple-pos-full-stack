@@ -12,10 +12,19 @@
   "auth": {
     "login": "Giriş Yap",
     "logout": "Çıkış Yap",
-    "email": "E-posta",
+    "login_subtitle": "Vardiyayı başlatmak için giriş yapın",
+    "username": "Kullanıcı Adı",
+    "username_placeholder": "Kullanıcı adınızı girin",
     "password": "Şifre",
+    "password_placeholder": "Şifrenizi girin",
     "forgotPassword": "Şifremi Unuttum",
-    "loginError": "Giriş başarısız. Lütfen bilgilerinizi kontrol edin."
+    "loginError": "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.",
+    "theme": {
+      "toggle": "Temayı Değiştir",
+      "light": "Açık",
+      "dark": "Koyu",
+      "system": "Sistem"
+    }
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",

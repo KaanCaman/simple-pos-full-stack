@@ -2,6 +2,9 @@ import { createBrowserRouter, Outlet } from "react-router-dom";
 import { RouteLogger } from "../components/RouteLogger";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { LoginPage } from "../features/auth/components/LoginPage";
+import { ProtectedRoute } from "../features/auth/components/ProtectedRoute";
+import { PublicRoute } from "../features/auth/components/PublicRoute";
+import { InactivityTracker } from "../components/InactivityTracker";
 
 // Root layout component that includes global providers/components.
 // Küresel sağlayıcıları/bileşenleri içeren kök düzen bileşeni.
@@ -9,6 +12,7 @@ const RootLayout = () => {
   return (
     <ErrorBoundary>
       <RouteLogger />
+      <InactivityTracker />
       <Outlet />
     </ErrorBoundary>
   );
@@ -22,15 +26,24 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "login",
-        element: <LoginPage />,
+        element: <PublicRoute />,
+        children: [
+          {
+            path: "login",
+            element: <LoginPage />,
+          },
+        ],
       },
       {
-        index: true,
-        element: <div>Welcome to Tostçu POS</div>, // Temporary placeholder
+        element: <ProtectedRoute />,
+        children: [
+          {
+            index: true,
+            element: <div>Welcome to Tostçu POS</div>, // Temporary placeholder
+          },
+          // Future protected routes will go here
+        ],
       },
-      // Feature routes will be added here later.
-      // Özellik rotaları daha sonra buraya eklenecek.
     ],
   },
   {
