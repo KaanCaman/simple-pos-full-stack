@@ -223,3 +223,11 @@ func (item *OrderItem) AfterSave(tx *gorm.DB) (err error) {
 
 	return tx.Save(&order).Error
 }
+
+// AfterDelete for OrderItem: Recalculate Order Totals
+// Sipariş kalemi için AfterDelete: Sipariş toplam tutarını yeniden hesapla
+func (item *OrderItem) AfterDelete(tx *gorm.DB) (err error) {
+	// Re-calculate the Order Total logic is same as AfterSave
+	// Just call AfterSave or duplicate logic. Let's duplicate for clarity and safety.
+	return item.AfterSave(tx)
+}

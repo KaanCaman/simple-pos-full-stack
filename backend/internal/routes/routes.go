@@ -30,7 +30,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	categoryService := services.NewCategoryService(categoryRepo)
 	productService := services.NewProductService(productRepo)
 	transactionService := services.NewTransactionService(transactionRepo)
-	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo)
+	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo, productRepo)
 	analyticsService := services.NewAnalyticsService(db, transactionRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
 
@@ -90,6 +90,11 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	orders := v1.Group("/orders")
 	orders.Post("/", orderHandler.Create)
 	orders.Post("/:id/close", orderHandler.Close)
+
+	// Order Item Modification
+	orders.Post("/:id/items", orderHandler.AddItem)
+	orders.Put("/:id/items/:itemId", orderHandler.UpdateItem)
+	orders.Delete("/:id/items/:itemId", orderHandler.RemoveItem)
 
 	// Analytics Routes (Protected for All Roles? Usually Admin)
 	// Let's secure analytics for Admin only as well, or keep it open if waiters need to see daily report.

@@ -42,6 +42,13 @@ type OrderRepository interface {
 	Create(order *models.Order) error
 	FindByID(id uint) (*models.Order, error)
 	Update(order *models.Order) error
+
+	// Item Management
+	AddItem(item *models.OrderItem) error
+	UpdateItem(item *models.OrderItem) error
+	DeleteItem(item *models.OrderItem) error
+	FindItem(itemID uint) (*models.OrderItem, error)
+
 	// WithTransaction runs a function within a database transaction
 	// Bir veritabanı işlemi içinde bir fonksiyon çalıştırır
 	WithTransaction(fn func(tx *gorm.DB) error) error
