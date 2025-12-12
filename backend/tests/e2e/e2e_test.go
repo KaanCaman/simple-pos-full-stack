@@ -30,6 +30,7 @@ var (
 	testDBPath = "tostcu_test.db"
 	adminPin   = "1234"
 	adminUser  = "admin"
+	logFile    *os.File
 )
 
 // TestMain controls the main entry point for E2E tests
@@ -45,6 +46,19 @@ func TestMain(m *testing.M) {
 
 	// Initialize JWT for tests
 	utils.InitJWT(cfg.JWTSecret)
+
+	// Create logs directory
+	if err := os.MkdirAll("logs", 0755); err != nil {
+		log.Fatalf("Failed to create logs directory: %v", err)
+	}
+
+	// Open log file
+	var err error
+	logFile, err = os.Create("logs/test-output.log")
+	if err != nil {
+		log.Fatalf("Failed to create log file: %v", err)
+	}
+	defer logFile.Close()
 
 	// Clean up any previous test db
 	cleanupDBFiles(testDBPath)
@@ -145,7 +159,7 @@ func TestE2E_FullFlow(t *testing.T) {
 			"role": "waiter",
 		}
 		resp, code := logAndRequest(t, "Create Waiter User", "POST", "/api/v1/users", payload, authToken)
-		require.True(t, code == http.StatusCreated || code == http.StatusOK, "Expected 201 or 200")
+		require.Equal(t, http.StatusCreated, code)
 
 		var user models.User
 		extractData(t, resp, &user)
@@ -185,7 +199,7 @@ func TestE2E_FullFlow(t *testing.T) {
 			"role": "waiter",
 		}
 		resp, code := logAndRequest(t, "Create Temp User for Delete", "POST", "/api/v1/users", payload, authToken)
-		require.True(t, code == http.StatusCreated || code == http.StatusOK, "Expected 201 or 200")
+		require.Equal(t, http.StatusCreated, code)
 		var tempUser models.User
 		extractData(t, resp, &tempUser)
 
@@ -208,7 +222,7 @@ func TestE2E_FullFlow(t *testing.T) {
 			"sort_order": 1,
 		}
 		resp, code := logAndRequest(t, "Create Category", "POST", "/api/v1/categories", payload, authToken)
-		require.Equal(t, http.StatusOK, code, "Expected 200/201")
+		require.Equal(t, http.StatusCreated, code)
 		// Note from previous run: Returns 200
 
 		var cat models.Category
@@ -224,11 +238,12 @@ func TestE2E_FullFlow(t *testing.T) {
 			"description": "Yayık",
 		}
 		resp, code := logAndRequest(t, "Create Product", "POST", "/api/v1/products", payload, authToken)
-		require.Equal(t, http.StatusOK, code)
+		require.Equal(t, http.StatusCreated, code)
 
 		var prod models.Product
 		extractData(t, resp, &prod)
 		productID = prod.ID
+		assert.Equal(t, "Içecekler", prod.Category.Name)
 	})
 
 	t.Run("3_Product_Update", func(t *testing.T) {
@@ -256,7 +271,7 @@ func TestE2E_FullFlow(t *testing.T) {
 			"name": "Masa 1",
 		}
 		resp, code := logAndRequest(t, "Create Table", "POST", "/api/v1/tables", payload, authToken)
-		require.True(t, code == http.StatusCreated || code == http.StatusOK, "Expected 201 or 200")
+		require.Equal(t, http.StatusCreated, code)
 
 		var table models.Table
 		extractData(t, resp, &table)
@@ -275,7 +290,7 @@ func TestE2E_FullFlow(t *testing.T) {
 			"waiter_id": createdUserID,
 		}
 		resp, code := logAndRequest(t, "Open Order for Table", "POST", "/api/v1/orders", payload, authToken)
-		require.True(t, code == http.StatusCreated || code == http.StatusOK, "Expected 201 or 200")
+		require.Equal(t, http.StatusCreated, code)
 
 		var order models.Order
 		extractData(t, resp, &order)
@@ -289,7 +304,7 @@ func TestE2E_FullFlow(t *testing.T) {
 			"quantity":   3,
 		}
 		_, code := logAndRequest(t, "Add Item to Order", "POST", fmt.Sprintf("/api/v1/orders/%d/items", orderID), payload, authToken)
-		require.True(t, code == http.StatusCreated || code == http.StatusOK, "Expected 201 or 200")
+		require.Equal(t, http.StatusCreated, code)
 	})
 
 	t.Run("5_Order_UpdateItem", func(t *testing.T) {
@@ -336,11 +351,12 @@ func TestE2E_FullFlow(t *testing.T) {
 			"payment_method": "CASH",
 		}
 		resp, code := logAndRequest(t, "Add Expense", "POST", "/api/v1/transactions/expense", payload, authToken)
-		require.Equal(t, http.StatusOK, code) // or 201
+		require.Equal(t, http.StatusCreated, code)
 
 		var tx models.Transaction
 		extractData(t, resp, &tx)
 		assert.Equal(t, int64(1500), tx.Amount)
+		assert.Equal(t, "CASH", tx.PaymentMethod)
 	})
 
 	// ==========================================
@@ -386,17 +402,21 @@ func extractData(t *testing.T, body []byte, target interface{}) {
 
 // logAndRequest performs the request and logs details explicitly
 func logAndRequest(t *testing.T, stepDesc, method, path string, payload interface{}, token string) ([]byte, int) {
-	fmt.Printf("\n>>> [STEP] %s\n", stepDesc)
-	fmt.Printf("    Request: %s %s\n", method, path)
+	// Console Output (Minimal)
+	fmt.Printf(">>> [STEP] %s\n", stepDesc)
+
+	// File Output (Detailed)
+	fmt.Fprintf(logFile, "\n>>> [STEP] %s\n", stepDesc)
+	fmt.Fprintf(logFile, "    Request: %s %s\n", method, path)
 
 	var body []byte
 	var err error
 	if payload != nil {
 		body, err = json.MarshalIndent(payload, "", "  ") // Indent for readability
 		require.NoError(t, err)
-		fmt.Printf("    Payload:\n%s\n", string(body))
+		fmt.Fprintf(logFile, "    Payload:\n%s\n", string(body))
 	} else {
-		fmt.Println("    Payload: <nil>")
+		fmt.Fprintln(logFile, "    Payload: <nil>")
 	}
 
 	req, err := http.NewRequest(method, baseURL+path, bytes.NewBuffer(body))
@@ -417,16 +437,16 @@ func logAndRequest(t *testing.T, stepDesc, method, path string, payload interfac
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	fmt.Printf("    Response Status: %d (%v)\n", resp.StatusCode, duration)
+	fmt.Fprintf(logFile, "    Response Status: %d (%v)\n", resp.StatusCode, duration)
 
 	// Try to pretty print response body if JSON
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, respBody, "", "  "); err == nil {
-		fmt.Printf("    Response Body:\n%s\n", prettyJSON.String())
+		fmt.Fprintf(logFile, "    Response Body:\n%s\n", prettyJSON.String())
 	} else {
-		fmt.Printf("    Response Body (Raw): %s\n", string(respBody))
+		fmt.Fprintf(logFile, "    Response Body (Raw): %s\n", string(respBody))
 	}
-	fmt.Println("----------------------------------------------------------------")
+	fmt.Fprintln(logFile, "----------------------------------------------------------------")
 
 	return respBody, resp.StatusCode
 }

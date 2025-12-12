@@ -32,7 +32,8 @@ func (s *ProductService) CreateProduct(name string, price int64, categoryID uint
 	if err := s.repo.Create(product); err != nil {
 		return nil, err
 	}
-	return product, nil
+	// Refetch to get Preloaded Category
+	return s.repo.FindByID(product.ID)
 }
 
 // GetProducts returns all products or filtered by category

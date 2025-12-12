@@ -4,6 +4,7 @@ import (
 	"simple-pos/internal/middleware"
 	"simple-pos/internal/services"
 	"simple-pos/pkg/constants"
+	"simple-pos/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -41,7 +42,7 @@ func (h *UserHandler) Create(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not create user")
 	}
 
-	return middleware.SuccessResponse(c, constants.CODE_CREATED, "User created successfully", CreateUserResponse{
+	return utils.Success(c, fiber.StatusCreated, string(constants.CODE_CREATED), "User created successfully", CreateUserResponse{
 		ID:   user.ID,
 		Name: user.Name,
 		Role: user.Role,

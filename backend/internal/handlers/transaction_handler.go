@@ -19,9 +19,10 @@ func NewTransactionHandler(service *services.TransactionService) *TransactionHan
 }
 
 type AddExpenseRequest struct {
-	Amount      int64  `json:"amount" validate:"required,min=1"`
-	Description string `json:"description" validate:"required"`
-	Category    string `json:"category" validate:"required"`
+	Amount        int64  `json:"amount" validate:"required,min=1"`
+	Description   string `json:"description" validate:"required"`
+	Category      string `json:"category" validate:"required"`
+	PaymentMethod string `json:"payment_method"`
 }
 
 // AddExpense handles creation of a manual expense
@@ -32,12 +33,12 @@ func (h *TransactionHandler) AddExpense(c *fiber.Ctx) error {
 		return err
 	}
 
-	transaction, err := h.service.AddExpense(req.Amount, req.Description, req.Category)
+	transaction, err := h.service.AddExpense(req.Amount, req.Description, req.Category, req.PaymentMethod)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not record expense")
 	}
 
-	return middleware.SuccessResponse(c, constants.CODE_CREATED, "Expense recorded successfully", transaction)
+	return utils.Success(c, fiber.StatusCreated, string(constants.CODE_CREATED), "Expense recorded successfully", transaction)
 }
 
 // ListExpenses returns expenses for a date range

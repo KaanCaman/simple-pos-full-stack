@@ -4,6 +4,7 @@ import (
 	"simple-pos/internal/middleware"
 	"simple-pos/internal/services"
 	"simple-pos/pkg/constants"
+	"simple-pos/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,7 +37,7 @@ func (h *CategoryHandler) Create(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not create category")
 	}
 
-	return middleware.SuccessResponse(c, constants.CODE_CREATED, "Category created successfully", category)
+	return utils.Success(c, fiber.StatusCreated, string(constants.CODE_CREATED), "Category created successfully", category)
 }
 
 // GetAll returns all categories

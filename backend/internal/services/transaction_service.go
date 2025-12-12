@@ -21,7 +21,7 @@ func NewTransactionService(repo repositories.TransactionRepository, wpRepo repos
 
 // AddExpense records a manual expense
 // Manuel gider kaydeder
-func (s *TransactionService) AddExpense(amount int64, description, category string) (*models.Transaction, error) {
+func (s *TransactionService) AddExpense(amount int64, description, category, paymentMethod string) (*models.Transaction, error) {
 	if amount <= 0 {
 		return nil, errors.New("amount must be positive")
 	}
@@ -43,6 +43,7 @@ func (s *TransactionService) AddExpense(amount int64, description, category stri
 		Description:     description,
 		TransactionDate: time.Now(),
 		WorkPeriodID:    wpID,
+		PaymentMethod:   paymentMethod,
 	}
 
 	if err := s.repo.Create(transaction); err != nil {
