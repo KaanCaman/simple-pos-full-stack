@@ -49,3 +49,39 @@ func (h *CategoryHandler) GetAll(c *fiber.Ctx) error {
 
 	return middleware.SuccessResponse(c, constants.CODE_SUCCESS, "Categories retrieved", categories)
 }
+
+// Update handles category update
+// Kategori güncellemeyi yönetir
+func (h *CategoryHandler) Update(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid ID")
+	}
+
+	var req CreateCategoryRequest
+	if err := middleware.ValidateBody(c, &req); err != nil {
+		return err
+	}
+
+	category, err := h.service.UpdateCategory(uint(id), req.Name, req.Icon, req.Color, req.SortOrder)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Could not update category")
+	}
+
+	return middleware.SuccessResponse(c, constants.CODE_UPDATED, "Category updated", category)
+}
+
+// Delete handles category deletion
+// Kategori silmeyi yönetir
+func (h *CategoryHandler) Delete(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid ID")
+	}
+
+	if err := h.service.DeleteCategory(uint(id)); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Could not delete category")
+	}
+
+	return middleware.SuccessResponse(c, constants.CODE_DELETED, "Category deleted", nil)
+}

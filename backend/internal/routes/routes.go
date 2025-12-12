@@ -16,67 +16,86 @@ import (
 // RegisterRoutes initializes all routes and dependencies
 // Tüm rotaları ve bağımlılıkları başlatır
 func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
-	// 1. Repositories
+	// 4. Initialize Repositories
 	userRepo := gorm_repo.NewUserRepository(db)
 	categoryRepo := gorm_repo.NewCategoryRepository(db)
 	productRepo := gorm_repo.NewProductRepository(db)
-	orderRepo := gorm_repo.NewOrderRepository(db)
 	transactionRepo := gorm_repo.NewTransactionRepository(db)
+	orderRepo := gorm_repo.NewOrderRepository(db)
 	workPeriodRepo := gorm_repo.NewWorkPeriodRepository(db)
+	tableRepo := gorm_repo.NewTableRepository(db)
 
-	// 2. Services
+	// 5. Initialize Services
 	authService := services.NewAuthService(userRepo)
-	userService := services.NewUserService(userRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	productService := services.NewProductService(productRepo)
 	transactionService := services.NewTransactionService(transactionRepo)
 	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo, productRepo)
 	analyticsService := services.NewAnalyticsService(db, transactionRepo)
+	userService := services.NewUserService(userRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
+	tableService := services.NewTableService(tableRepo)
 
-	// 3. Handlers
+	// 6. Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService)
-	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	productHandler := handlers.NewProductHandler(productService)
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 	orderHandler := handlers.NewOrderHandler(orderService)
-	managementHandler := handlers.NewManagementHandler(managementService)
 	analyticsHandler := handlers.NewAnalyticsHandler(analyticsService)
+	userHandler := handlers.NewUserHandler(userService)
+	managementHandler := handlers.NewManagementHandler(managementService)
+	tableHandler := handlers.NewTableHandler(tableService)
 
-	// 4. Routes
-
-	// Public Routes
-	auth := app.Group("/auth")
-	auth.Post("/login", authHandler.Login)
-
-	// Protected Routes
-	api := app.Group("/api")
-	v1 := api.Group("/v1", middleware.Protected())
+	// 7. Route Groups
+	api := app.Group("/api/v1") // /api/v1
 
 	// Health Check
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Tostcu POS Backend is running!", nil)
 	})
 
-	// Public Menu Routes (Authenticated users can see menu)
-	// Authenticated users (waiters) need to see categories/products
-	// Actually requirements said: "GET /api/v1/products (Optional: filter by category_id)"
-	// Let's keep them under v1 (Protected) so only logged in users (waiters/admins) can see them.
-	// Or should they be public? POS usually requires login. Let's keep them in v1.
-	v1.Get("/categories", categoryHandler.GetAll)
-	v1.Get("/products", productHandler.GetAll)
+	// Public Routes
+	app.Post("/auth/login", authHandler.Login)
+	api.Get("/categories", categoryHandler.GetAll)
+	api.Get("/products", productHandler.GetAll)
 
-	// Admin Only Routes
-	admin := v1.Group("/", middleware.RequireRole("admin"))
+	// Protected Routes (Waiter + Admin)
+	protected := api.Group("/", middleware.Protected())
+
+	// Tables (Read-Only Public/Protected) - Waiters need to see tables.
+	protected.Get("/tables", tableHandler.ListTables)
+
+	// Orders
+	protected.Post("/orders", orderHandler.Create)
+	protected.Post("/orders/:id/close", orderHandler.Close)
+	protected.Post("/orders/:id/items", orderHandler.AddItem)
+	protected.Put("/orders/:id/items/:itemId", orderHandler.UpdateItem)
+	protected.Delete("/orders/:id/items/:itemId", orderHandler.RemoveItem)
+
+	// Admin Routes
+	admin := protected.Group("/", middleware.RequireRole("admin"))
 
 	// User Management
 	admin.Post("/users", userHandler.Create)
+	admin.Get("/users", userHandler.GetUsers)
+	admin.Get("/users/:id", userHandler.GetUserByID)
+	admin.Put("/users/:id", userHandler.UpdateUser)
+	admin.Put("/users/:id/pin", userHandler.ChangePin)
+	admin.Delete("/users/:id", userHandler.DeleteUser)
 
 	// Menu Management (Admin)
 	admin.Post("/categories", categoryHandler.Create)
+	admin.Put("/categories/:id", categoryHandler.Update)
+	admin.Delete("/categories/:id", categoryHandler.Delete)
 	admin.Post("/products", productHandler.Create)
 	admin.Put("/products/:id", productHandler.Update)
+	admin.Delete("/products/:id", productHandler.Delete)
+
+	// Table Management (Admin)
+	admin.Post("/tables", tableHandler.CreateTable)
+	admin.Put("/tables/:id", tableHandler.UpdateTable)
+	admin.Delete("/tables/:id", tableHandler.DeleteTable)
 
 	// Expense Management (Admin)
 	admin.Post("/transactions/expense", transactionHandler.AddExpense)
@@ -89,20 +108,6 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	management.Post("/start-day", managementHandler.StartDay)
 	management.Post("/end-day", managementHandler.EndDay)
 
-	// Order Routes (Protected for All Roles)
-	orders := v1.Group("/orders")
-	orders.Post("/", orderHandler.Create)
-	orders.Post("/:id/close", orderHandler.Close)
-
-	// Order Item Modification
-	orders.Post("/:id/items", orderHandler.AddItem)
-	orders.Put("/:id/items/:itemId", orderHandler.UpdateItem)
-	orders.Delete("/:id/items/:itemId", orderHandler.RemoveItem)
-
-	// Analytics Routes (Protected for All Roles? Usually Admin)
-	// Let's secure analytics for Admin only as well, or keep it open if waiters need to see daily report.
-	// Task didn't specify, but safer to keep analytics secure.
-	// Existing code had it under v1 (Protected). Let's leave it there for now.
-	analytics := v1.Group("/analytics")
-	analytics.Get("/daily", analyticsHandler.GetDailyReport)
+	// Analytics Routes (Admin)
+	admin.Get("/analytics/daily", analyticsHandler.GetDailyReport)
 }

@@ -29,6 +29,11 @@ func (s *AuthService) Login(userID uint, pin string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
+	if !user.IsActive {
+		logger.Warn("Login failed: User is inactive", logger.Int("user_id", int(userID)))
+		return "", errors.New("account is disabled")
+	}
+
 	// 2. Verify PIN (Hash)
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PinCode), []byte(pin)); err != nil {
 		logger.Warn("Login failed: Invalid PIN", logger.Int("user_id", int(userID)))

@@ -65,3 +65,9 @@ func (s *ProductService) UpdateProduct(id uint, name string, price int64, isAvai
 	}
 	return product, nil
 }
+
+// DeleteProduct deletes a product
+// Bir ürünü siler
+func (s *ProductService) DeleteProduct(id uint) error {
+	return s.repo.Delete(id)
+}

@@ -87,3 +87,18 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 
 	return middleware.SuccessResponse(c, constants.CODE_UPDATED, "Product updated successfully", product)
 }
+
+// Delete handles product deletion
+// Ürün silmeyi yönetir
+func (h *ProductHandler) Delete(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid ID")
+	}
+
+	if err := h.service.DeleteProduct(uint(id)); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Could not delete product")
+	}
+
+	return middleware.SuccessResponse(c, constants.CODE_DELETED, "Product deleted", nil)
+}

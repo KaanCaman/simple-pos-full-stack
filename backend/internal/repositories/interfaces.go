@@ -34,6 +34,8 @@ type UserRepository interface {
 	Create(user *models.User) error
 	FindByID(id uint) (*models.User, error)
 	FindAll() ([]models.User, error)
+	Update(user *models.User) error
+	Delete(id uint) error
 }
 
 // OrderRepository defines the interface for order data access
@@ -75,4 +77,14 @@ type WorkPeriodRepository interface {
 	FindActivePeriod() (*models.WorkPeriod, error)
 	Update(period *models.WorkPeriod) error
 	FindByID(id uint) (*models.WorkPeriod, error)
+}
+
+// TableRepository defines the interface for table data access
+// Masa veri erişimi için arayüzü tanımlar
+type TableRepository interface {
+	Create(table *models.Table) error
+	FindAll() ([]models.Table, error)
+	FindByID(id uint) (*models.Table, error)
+	Update(table *models.Table) error
+	Delete(id uint) error
 }
