@@ -4,6 +4,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import type { Order } from "../../../types/operation";
+import { AppConstants } from "../../../constants/app";
 
 export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
   const { orderStore, uiStore, authStore } = useStore();
@@ -60,11 +61,13 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
 
   const handleCancelOrder = () => {
     uiStore.showConfirmation({
-      title: "Siparişi İptal Et", // Localization needed
-      message:
-        "Bu siparişi tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      title: t("pos.cancel_order_title", "Siparişi İptal Et"),
+      message: t(
+        "pos.cancel_order_message",
+        "Bu siparişi tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+      ),
       type: "danger",
-      confirmText: "Evet, İptal Et",
+      confirmText: t("pos.confirm_cancel", "Evet, İptal Et"),
       onConfirm: async () => {
         if (orderStore.currentOrder) {
           const tableId = orderStore.currentOrder.table_id;
@@ -133,7 +136,7 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
           >
             <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 bg-red-100 dark:bg-red-900/30 rounded-md">
               <Trash2 className="w-3 h-3" />
-              İPTAL
+              {t("pos.cancel_label", "İPTAL")}
             </span>
           </button>
         </div>
@@ -203,8 +206,18 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
             <span>{(orderStore.cartTotal / 100).toFixed(2)} ₺</span>
           </div>
           <div className="flex justify-between items-center text-sm text-gray-500">
-            <span>KDV (%10)</span> {/* Should be calculated properly later */}
-            <span>{((orderStore.cartTotal * 0.1) / 100).toFixed(2)} ₺</span>
+            <span>
+              {t("pos.vat_rate_dynamic", {
+                rate: AppConstants.TAX_RATE * 100,
+                defaultValue: `KDV (%${AppConstants.TAX_RATE * 100})`,
+              })}
+            </span>
+            <span>
+              {((orderStore.cartTotal * AppConstants.TAX_RATE) / 100).toFixed(
+                2
+              )}{" "}
+              ₺
+            </span>
           </div>
         </div>
 
@@ -213,7 +226,11 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
             {t("pos.total_amount")}
           </span>
           <span className="text-3xl font-black text-primary-500">
-            {((orderStore.cartTotal * 1.1) / 100).toFixed(2)} ₺
+            {(
+              (orderStore.cartTotal * (1 + AppConstants.TAX_RATE)) /
+              100
+            ).toFixed(2)}{" "}
+            ₺
           </span>
         </div>
 
@@ -223,7 +240,9 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
             className="py-4 bg-[#FFC107] hover:bg-[#FFD54F] text-black rounded-xl font-black text-lg shadow-lg shadow-yellow-500/20 active:scale-[0.98] transition-all flex flex-col items-center leading-none gap-1"
           >
             <span>{t("pos.pay_cash")}</span>
-            <span className="text-xs font-medium opacity-70">NAKİT ÖDE</span>
+            <span className="text-xs font-medium opacity-70">
+              {t("pos.pay_cash_hint", "NAKİT ÖDE")}
+            </span>
           </button>
 
           <button
@@ -231,7 +250,9 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
             className="py-4 bg-[#1A1D1F] hover:bg-[#2C2E33] text-white rounded-xl font-black text-lg shadow-lg shadow-gray-900/20 active:scale-[0.98] transition-all flex flex-col items-center leading-none gap-1"
           >
             <span>{t("pos.pay_credit")}</span>
-            <span className="text-xs font-medium opacity-70">KART (POS)</span>
+            <span className="text-xs font-medium opacity-70">
+              {t("pos.pay_credit_hint", "KART (POS)")}
+            </span>
           </button>
         </div>
       </div>

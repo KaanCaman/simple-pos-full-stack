@@ -1,5 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Trash2, Plus, Minus, CreditCard, Banknote } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { AppConstants } from "../../../constants/app";
 
 interface OrderItem {
   id: number;
@@ -22,11 +24,12 @@ export const OrderSummary = observer(
     onRemoveItem,
     onCloseOrder,
   }: OrderSummaryProps) => {
+    const { t } = useTranslation();
     const subtotal = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const tax = subtotal * 0.1; // 10% VAT example
+    const tax = subtotal * AppConstants.TAX_RATE;
     const total = subtotal + tax;
 
     return (
@@ -35,7 +38,10 @@ export const OrderSummary = observer(
         <div className="p-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex justify-between items-center mb-1">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Masa 5 Siparişi
+              {t("pos.table_order_title", {
+                table: "5",
+                defaultValue: "Masa 5 Siparişi",
+              })}
             </h2>
             <button
               onClick={() => onRemoveItem(0)} // Example usage or clear all
@@ -45,7 +51,11 @@ export const OrderSummary = observer(
             </button>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Sipariş #2941 • Garson: Ahmet Y.
+            {t("pos.order_info", {
+              id: "2941",
+              waiter: "Ahmet Y.",
+              defaultValue: "Sipariş #2941 • Garson: Ahmet Y.",
+            })}
           </p>
         </div>
 
@@ -53,7 +63,7 @@ export const OrderSummary = observer(
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
-              <p>Sipariş henüz boş</p>
+              <p>{t("pos.empty_order", "Sipariş henüz boş")}</p>
             </div>
           ) : (
             items.map((item) => (
@@ -103,15 +113,20 @@ export const OrderSummary = observer(
         <div className="p-6 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-200 dark:border-gray-800">
           <div className="space-y-2 mb-6">
             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-              <span>Ara Toplam</span>
+              <span>{t("pos.subtotal", "Ara Toplam")}</span>
               <span>₺{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-              <span>KDV (%10)</span>
+              <span>
+                {t("pos.vat_rate", {
+                  rate: AppConstants.TAX_RATE * 100,
+                  defaultValue: `KDV (%${AppConstants.TAX_RATE * 100})`,
+                })}
+              </span>
               <span>₺{tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-2xl font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700">
-              <span>Genel Toplam</span>
+              <span>{t("pos.total_amount", "Genel Toplam")}</span>
               <span className="text-primary-500">₺{total.toFixed(2)}</span>
             </div>
           </div>
@@ -122,14 +137,18 @@ export const OrderSummary = observer(
               className="flex flex-col items-center justify-center p-4 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors shadow-lg shadow-primary-500/20"
             >
               <Banknote className="h-6 w-6 mb-1" />
-              <span className="font-bold">NAKİT ÖDE</span>
+              <span className="font-bold">
+                {t("pos.pay_cash", "NAKİT ÖDE")}
+              </span>
             </button>
             <button
               onClick={() => onCloseOrder("pos")}
               className="flex flex-col items-center justify-center p-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-colors dark:bg-black dark:border dark:border-gray-800"
             >
               <CreditCard className="h-6 w-6 mb-1" />
-              <span className="font-bold">KART (POS)</span>
+              <span className="font-bold">
+                {t("pos.pay_credit", "KART (POS)")}
+              </span>
             </button>
           </div>
         </div>

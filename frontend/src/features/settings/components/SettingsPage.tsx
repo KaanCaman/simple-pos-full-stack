@@ -34,54 +34,76 @@ export const SettingsPage = observer(() => {
 
   const sections = [
     {
-      title: "İşletme Yönetimi",
+      title: t("settings.business_management", "İşletme Yönetimi"),
       items: [
         {
           id: "tables",
           icon: LayoutGrid,
-          label: "Masa Düzeni",
-          desc: "Kat planı ve masa yerleşimi",
+          label: t("settings.sections.table_management", "Masa Düzeni"),
+          desc: t(
+            "settings.sections.table_management_desc",
+            "Kat planı ve masa yerleşimi"
+          ),
           component: <TableManagement />,
         },
         {
           id: "categories",
           icon: Tags,
-          label: "Kategoriler",
-          desc: "Menü kategorileri ve renkleri",
+          label: t("settings.sections.category_management", "Kategoriler"),
+          desc: t(
+            "settings.sections.category_management_desc",
+            "Menü kategorileri ve renkleri"
+          ),
           component: <CategoryManagement />,
         },
         {
           id: "products",
           icon: UtensilsCrossed,
-          label: "Ürünler",
-          desc: "Menü kalemleri ve fiyatlar",
+          label: t("settings.sections.product_management", "Ürünler"),
+          desc: t(
+            "settings.sections.product_management_desc",
+            "Menü kalemleri ve fiyatlar"
+          ),
           component: <ProductManagement />,
         },
         {
           id: "expenses",
           icon: Receipt,
-          label: "Gider Yönetimi",
-          desc: "Harcamalar ve gider takibi",
+          label: t("settings.sections.expense_management", "Gider Yönetimi"),
+          desc: t(
+            "settings.sections.expense_management_desc",
+            "Harcamalar ve gider takibi"
+          ),
           component: <ExpenseManagement />,
         },
       ],
     },
     {
-      title: "Hesap & Sistem",
+      title: t("settings.account_system", "Hesap & Sistem"),
       items: [
         {
           id: "profile",
           icon: User,
-          label: "Profil Bilgileri",
-          desc: "Ad, soyad ve iletişim bilgileri",
-          component: <div className="p-4">Profil Ayarları (Yakında)</div>,
+          label: t("settings.sections.profile", "Profil Bilgileri"),
+          desc: t(
+            "settings.sections.profile_desc",
+            "Ad, soyad ve iletişim bilgileri"
+          ),
+          component: (
+            <div className="p-4">{t("common.coming_soon", "Yakında")}</div>
+          ),
         },
         {
           id: "staff",
           icon: Shield,
-          label: "Personel Yönetimi",
-          desc: "Garson hesapları ve yetkiler",
-          component: <div className="p-4">Personel Yönetimi (Yakında)</div>,
+          label: t("settings.sections.user_management", "Personel Yönetimi"),
+          desc: t(
+            "settings.sections.user_management_desc",
+            "Garson hesapları ve yetkiler"
+          ),
+          component: (
+            <div className="p-4">{t("common.coming_soon", "Yakında")}</div>
+          ),
         },
       ],
     },
@@ -124,7 +146,7 @@ export const SettingsPage = observer(() => {
           {t("dashboard.menu.settings")}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          Sistem ve hesap ayarlarınızı yönetin
+          {t("settings.subtitle", "Sistem ve hesap ayarlarınızı yönetin")}
         </p>
       </div>
 

@@ -25,6 +25,11 @@
     "floor": {
       "ground": "Zemin Kat",
       "terrace": "Teras"
+    },
+    "floor_overview": "Kat Görünümü",
+    "quick_actions": {
+      "pos_title": "Satış Ekranını Aç",
+      "pos_desc": "Yeni sipariş oluşturmak veya varolanları yönetmek için tıklayın."
     }
   },
   "pos": {
@@ -59,7 +64,17 @@
     "payment_method": "Ödeme Yöntemi",
     "select_product": "Sipariş eklemek için ürün seçin",
     "waiter": "Garson",
-    "order_number": "Sipariş No"
+    "order_number": "Sipariş No",
+    "vat_rate_dynamic": "KDV (%{{rate}})",
+    "cancel_order_title": "Siparişi İptal Et",
+    "cancel_order_message": "Bu siparişi tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "confirm_cancel": "Evet, İptal Et",
+    "cancel_label": "İPTAL",
+    "pay_cash_hint": "NAKİT ÖDE",
+    "pay_credit_hint": "KART (POS)",
+    "empty_order": "Sipariş henüz boş",
+    "table_order_title": "Masa {{table}} Siparişi",
+    "order_info": "Sipariş #{{id}} • Garson: {{waiter}}"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -141,6 +156,31 @@
       "create_success": "Ürün oluşturuldu",
       "update_success": "Ürün güncellendi"
     }
+  },
+  "reports": {
+    "title": "Günlük Rapor (Canlı)",
+    "history_title": "Geçmiş Gün Raporu",
+    "back_to_list": "Listeye Dön",
+    "history_reports": "Geçmiş Raporlar",
+    "total_sales": "Toplam Satış",
+    "cash_pos": "Nakit / POS",
+    "total_expenses": "Toplam Gider",
+    "net_profit": "Net Kar",
+    "order_history": "Sipariş Geçmişi",
+    "expenses": "Giderler",
+    "no_orders_today": "Bugün henüz sipariş yok.",
+    "no_expenses_today": "Bugün henüz gider yok.",
+    "total": "Toplam",
+    "danger_zone": "Tehlikeli Bölge",
+    "end_day": "Günü Kapat",
+    "end_day_desc": "Gün sonu işlemini başlatır. Tüm açık masalar otomatik olarak kapatılmaz, kontrol edilmelidir. Bu işlemden sonra yeni sipariş alınamaz.",
+    "end_day_confirm_title": "Günü Kapat",
+    "end_day_confirm_message": "Günü kapatmak istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm açık masaları etkileyebilir. Gün sonu raporu oluşturulacaktır.",
+    "end_day_success": "Gün başarıyla kapatıldı.",
+    "end_day_error": "Gün kapatılamadı.",
+    "report_not_found": "Rapor Bulunamadı",
+    "report_not_found_desc": "Veriler yüklenirken bir sorun oluştu veya bu tarih için kayıt bulunmuyor. Lütfen sayfayı yenilemeyi deneyin.",
+    "refresh": "Yenile"
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",

@@ -3,9 +3,15 @@
 
 export class AppConstants {
   static readonly APP_VERSION = "0.0.1";
-  static readonly APP_NAME = "755 Erzincan";
-  static readonly API_URL = "http://localhost:3000"; // Trigger axios trailing slash handling manually if needed, or keep standard
-  static readonly IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  static readonly APP_NAME = import.meta.env.VITE_APP_NAME || "APP NAME";
+  static readonly API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:3000";
+  static readonly IDLE_TIMEOUT =
+    Number(import.meta.env.VITE_IDLE_TIMEOUT) || 15 * 60 * 1000; // 15 minutes
+  static readonly TAX_RATE =
+    import.meta.env.VITE_TAX_RATE !== undefined
+      ? Number(import.meta.env.VITE_TAX_RATE)
+      : 0;
 }
 
 export class AppEndPoints {

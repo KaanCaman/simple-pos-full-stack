@@ -9,9 +9,13 @@ export const StartDayPage = observer(() => {
   const { authStore } = useStore();
   const navigate = useNavigate();
 
-  const handleStartDay = () => {
-    authStore.startDay();
-    navigate("/");
+  const handleStartDay = async () => {
+    try {
+      await authStore.startDay();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to start day:", error);
+    }
   };
 
   return (
