@@ -4,6 +4,7 @@ import { TableStore } from "../features/dashboard/stores/tableStore";
 import { CategoryStore } from "../features/dashboard/stores/categoryStore";
 import { ProductStore } from "../features/dashboard/stores/productStore";
 import { OrderStore } from "../features/dashboard/stores/orderStore"; // Added OrderStore import
+import { ExpenseStore } from "../features/expenses/stores/expenseStore";
 import { UiStore } from "./uiStore";
 
 // Root store for global state management.
@@ -14,6 +15,7 @@ export class RootStore {
   categoryStore: CategoryStore;
   productStore: ProductStore;
   orderStore: OrderStore; // Added orderStore property
+  expenseStore: ExpenseStore;
   uiStore: UiStore;
 
   constructor() {
@@ -22,6 +24,7 @@ export class RootStore {
     this.categoryStore = new CategoryStore(this);
     this.productStore = new ProductStore(this);
     this.orderStore = new OrderStore(this); // Initialized orderStore
+    this.expenseStore = new ExpenseStore(this);
     this.uiStore = new UiStore(this);
   }
 }

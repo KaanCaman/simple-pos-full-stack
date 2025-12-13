@@ -9,10 +9,12 @@ import {
   Tags,
   ChevronRight,
   ChevronLeft,
+  Receipt,
 } from "lucide-react";
 import { TableManagement } from "./sections/TableManagement";
 import { CategoryManagement } from "./sections/CategoryManagement";
 import { ProductManagement } from "./sections/ProductManagement";
+import { ExpenseManagement } from "./sections/ExpenseManagement";
 
 type SectionId =
   | "profile"
@@ -23,6 +25,7 @@ type SectionId =
   | "tables"
   | "categories"
   | "products"
+  | "expenses" // Added
   | null;
 
 export const SettingsPage = observer(() => {
@@ -53,6 +56,13 @@ export const SettingsPage = observer(() => {
           label: "Ürünler",
           desc: "Menü kalemleri ve fiyatlar",
           component: <ProductManagement />,
+        },
+        {
+          id: "expenses",
+          icon: Receipt,
+          label: "Gider Yönetimi",
+          desc: "Harcamalar ve gider takibi",
+          component: <ExpenseManagement />,
         },
       ],
     },

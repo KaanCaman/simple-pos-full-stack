@@ -37,12 +37,12 @@ class ApiClient {
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         logger.info(
-          `Request ${config.method?.toUpperCase()} ${config.baseURL}/${
+          `Request ${config.method?.toUpperCase()} ${config.baseURL}${
             config.url
           }`,
           {
             method: config.method,
-            url: `${config.baseURL}/${config.url}`,
+            url: `${config.baseURL}${config.url}`,
             body: config.data,
           },
           "API"
@@ -55,10 +55,10 @@ class ApiClient {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
         logger.info(
-          `Response ${response.status} ${response.config.baseURL}/${response.config.url}`,
+          `Response ${response.status} ${response.config.baseURL}${response.config.url}`,
           {
             status: response.status,
-            url: `${response.config.baseURL}/${response.config.url}`,
+            url: `${response.config.baseURL}${response.config.url}`,
             body: response.data,
           },
           "API"
@@ -78,7 +78,7 @@ class ApiClient {
         logger.error(
           `API Error: ${error.message}`,
           {
-            url: `${error.config?.baseURL}/${error.config?.url}`,
+            url: `${error.config?.baseURL}${error.config?.url}`,
             status: error.response?.status,
             body: error.response?.data,
           },
