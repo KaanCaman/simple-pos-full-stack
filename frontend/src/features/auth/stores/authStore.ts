@@ -11,6 +11,7 @@ export class AuthStore {
   @observable token: string | null = null;
   @observable isAuthenticated: boolean = false;
   @observable isLoading: boolean = false;
+  @observable isInitializing: boolean = true;
   @observable error: string | null = null;
 
   @observable isDayOpen: boolean = false;
@@ -32,6 +33,7 @@ export class AuthStore {
   // Başlatma sırasında yerel depolamadan belirteci yükle.
   @action
   async loadToken() {
+    this.isInitializing = true;
     const token = localStorage.getItem("token");
 
     if (token) {
@@ -53,7 +55,15 @@ export class AuthStore {
         // If status check fails (e.g. 401), logout
         logger.error("Failed to verify session status", { error }, "AuthStore");
         this.logout();
+      } finally {
+        runInAction(() => {
+          this.isInitializing = false;
+        });
       }
+    } else {
+      runInAction(() => {
+        this.isInitializing = false;
+      });
     }
   }
 
