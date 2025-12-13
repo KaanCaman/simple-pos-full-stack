@@ -4,9 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   User,
   Shield,
-  CreditCard,
-  Bell,
-  Key,
   LayoutGrid,
   UtensilsCrossed,
   Tags,

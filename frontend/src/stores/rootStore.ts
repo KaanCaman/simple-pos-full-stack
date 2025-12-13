@@ -1,13 +1,19 @@
 import { createContext, useContext } from "react";
 import { AuthStore } from "../features/auth/stores/authStore";
+import { TableStore } from "../features/dashboard/stores/tableStore";
+import { UiStore } from "./uiStore";
 
 // Root store for global state management.
 // Küresel durum yönetimi için kök mağaza.
 export class RootStore {
   authStore: AuthStore;
+  tableStore: TableStore;
+  uiStore: UiStore;
 
   constructor() {
     this.authStore = new AuthStore(this);
+    this.tableStore = new TableStore(this);
+    this.uiStore = new UiStore(this);
   }
 }
 

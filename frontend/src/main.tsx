@@ -1,15 +1,16 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
 import { RouterProvider } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import "./i18n";
+import "./index.css";
 import { appRoutes } from "./routes";
-import "./i18n"; // Initialize i18n
-
 import { ThemeProvider } from "./providers/ThemeProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider>
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <RouterProvider router={appRoutes} />
     </ThemeProvider>
   </StrictMode>

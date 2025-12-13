@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { Sidebar } from "../components/layout/Sidebar";
 import { Header } from "../components/layout/Header";
 import { ExpenseModal } from "../features/expenses/components/ExpenseModal";
+import { GlobalConfirmationDialog } from "../components/GlobalConfirmationDialog";
 
 export const MainLayout = observer(() => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +34,7 @@ export const MainLayout = observer(() => {
         isOpen={expenseModalOpen}
         onClose={() => setExpenseModalOpen(false)}
       />
+      <GlobalConfirmationDialog />
     </div>
   );
 });

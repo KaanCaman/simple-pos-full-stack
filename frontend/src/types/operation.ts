@@ -7,9 +7,14 @@ export type PaymentMethod = "CASH" | "CREDIT_CARD" | "";
 export interface Table extends BaseEntity {
   name: string;
   status: TableStatus;
+  current_order_id?: number;
 }
 
 export interface CreateTableRequest {
+  name: string;
+}
+
+export interface UpdateTableRequest {
   name: string;
 }
 
