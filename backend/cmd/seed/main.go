@@ -30,7 +30,7 @@ func main() {
 	}
 
 	admin := models.User{
-		Name:     "Admin User",
+		Name:     "root",
 		PinCode:  string(hashedPin),
 		Role:     "admin",
 		IsActive: true,

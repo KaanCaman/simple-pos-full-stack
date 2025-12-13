@@ -58,67 +58,100 @@ func (s *ManagementService) EndDay(userID uint) (*models.DailyReport, error) {
 		return nil, errors.New("no active work period found")
 	}
 
-	report := &models.DailyReport{
-		ReportDate: time.Now().Format("2006-01-02"),
-		UpdatedAt:  time.Now(),
-	}
+	// 1. Calculate Stats for this Work Period (Strictly by ID)
+	now := time.Now()
 
-	err = s.db.Transaction(func(tx *gorm.DB) error {
-		type Result struct {
-			TotalOrders int
-			TotalSales  int64
-		}
-		var res Result
+	var totalOrders int64
+	s.db.Model(&models.Order{}).
+		Where("work_period_id = ?", period.ID).
+		Count(&totalOrders)
 
-		if err := tx.Model(&models.Order{}).
-			Where("work_period_id = ? AND status = ?", period.ID, "COMPLETED").
-			Select("count(id) as total_orders, COALESCE(sum(total_amount), 0) as total_sales").
-			Scan(&res).Error; err != nil {
-			return err
-		}
-		report.TotalOrders = res.TotalOrders
-		report.TotalSales = res.TotalSales
+	var totalSales float64
+	s.db.Model(&models.Order{}).
+		Where("work_period_id = ?", period.ID).
+		Select("COALESCE(sum(total_amount), 0)").
+		Scan(&totalSales)
 
-		var cashSales int64
-		// Updated to use constant based on recent user edits if needed, but keeping string literal to be safe or checking models
-		// User edited models.go in Step 75 adding constants.
-		// "CASH" vs models.PaymentMethodCash.
-		// I'll stick to string for now to match previous impl, or use constant if I knew the package import was updated properly.
-		// I'll use "CASH" matching the code I wrote before.
-		tx.Model(&models.Order{}).
-			Where("work_period_id = ? AND status = ? AND payment_method = ?", period.ID, "COMPLETED", "CASH").
-			Select("COALESCE(sum(total_amount), 0)").
-			Scan(&cashSales)
-		report.CashSales = cashSales
-		report.PosSales = report.TotalSales - report.CashSales
+	var cashSales float64
+	s.db.Model(&models.Order{}).
+		Where("work_period_id = ? AND payment_method = ?", period.ID, "CASH").
+		Select("COALESCE(sum(total_amount), 0)").
+		Scan(&cashSales)
 
-		var totalExpenses int64
-		tx.Model(&models.Transaction{}).
-			Where("work_period_id = ? AND type = ?", period.ID, "EXPENSE").
-			Select("COALESCE(sum(amount), 0)").
-			Scan(&totalExpenses)
-		report.TotalExpenses = totalExpenses
-		report.NetProfit = report.TotalSales - report.TotalExpenses
+	var posSales float64
+	s.db.Model(&models.Order{}).
+		Where("work_period_id = ? AND payment_method = ?", period.ID, "CREDIT_CARD").
+		Select("COALESCE(sum(total_amount), 0)").
+		Scan(&posSales)
 
-		if err := tx.Save(report).Error; err != nil {
-			return err
-		}
+	var totalExpenses float64
+	s.db.Model(&models.Transaction{}).
+		Where("work_period_id = ? AND type = ?", period.ID, "EXPENSE").
+		Select("COALESCE(sum(amount), 0)").
+		Scan(&totalExpenses)
 
-		now := time.Now()
-		period.IsActive = false
-		period.EndTime = &now
-		period.ClosedBy = userID
+	// 2. Close Work Period with Stats
+	period.IsActive = false
+	period.EndTime = &now
+	period.ClosedBy = userID
+	period.TotalOrders = int(totalOrders)
+	period.TotalSales = int64(totalSales)
+	period.TotalExpenses = int64(totalExpenses)
+	period.NetProfit = int64(totalSales - totalExpenses)
 
-		if err := tx.Save(period).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	if err != nil {
+	if err := s.workPeriodRepo.Update(period); err != nil {
+		logger.Error("Failed to close work period", logger.Err(err))
 		return nil, err
 	}
 
-	return report, nil
+	// 3. Update/Aggregate Daily Report (Optional but good for fallback)
+	reportDate := period.StartTime.Format("2006-01-02")
+	var report models.DailyReport
+	if err := s.db.Where("report_date = ?", reportDate).First(&report).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			report.ReportDate = reportDate
+		} else {
+			logger.Error("Failed to find daily report", logger.Err(err))
+			return nil, err
+		}
+	}
+
+	// RE-CALCULATION FOR DAILY REPORT (Aggregation)
+	// We want the DailyReport to represent the WHOLE DAY.
+	// So we should query everything for that Day OR Sum all periods.
+	// Summing periods is better if we trust period stats.
+	// Let's just query everything for the day (00:00-23:59) for the DailyReport record.
+
+	dayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	dayEnd := dayStart.Add(24 * time.Hour)
+
+	var drTotalOrders int64
+	s.db.Model(&models.Order{}).Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).Count(&drTotalOrders)
+
+	var drTotalSales float64
+	s.db.Model(&models.Order{}).Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).Select("COALESCE(sum(total_amount), 0)").Scan(&drTotalSales)
+
+	var drTotalExpenses float64
+	s.db.Model(&models.Transaction{}).Where("type = ? AND created_at >= ? AND created_at < ?", "EXPENSE", dayStart, dayEnd).Select("COALESCE(sum(amount), 0)").Scan(&drTotalExpenses)
+
+	report.TotalOrders = int(drTotalOrders)
+	report.TotalSales = int64(drTotalSales)
+	report.TotalExpenses = int64(drTotalExpenses)
+	report.NetProfit = int64(drTotalSales - drTotalExpenses)
+	report.CashSales = 0 // Keeping simplified
+	report.PosSales = 0
+
+	report.UpdatedAt = now
+	if err := s.db.Save(&report).Error; err != nil {
+		logger.Error("Failed to save daily report", logger.Err(err))
+		return nil, err
+	}
+
+	logger.Info("Work period ended", logger.Int("period_id", int(period.ID)))
+	return &report, nil
+}
+
+// GetActivePeriod returns the current active work period or nil if none
+func (s *ManagementService) GetActivePeriod() (*models.WorkPeriod, error) {
+	return s.workPeriodRepo.FindActivePeriod()
 }

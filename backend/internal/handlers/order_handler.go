@@ -44,6 +44,72 @@ func (h *OrderHandler) Create(c *fiber.Ctx) error {
 	return utils.Success(c, fiber.StatusCreated, utils.CodeOK, "Order created", order)
 }
 
+// GetOrder handles GET /orders/:id
+// Sipariş detaylarını getirir
+func (h *OrderHandler) GetOrder(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Order ID")
+	}
+
+	order, err := h.service.GetOrder(uint(id))
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeResourceNotFound, "Order not found")
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Order details", order)
+}
+
+// GetOrders handles GET /orders?start_date=...&end_date=...&scope=active
+func (h *OrderHandler) GetOrders(c *fiber.Ctx) error {
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+	scope := c.Query("scope")
+
+	now := time.Now()
+	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	endDate := startDate.Add(24 * time.Hour)
+
+	if startDateStr != "" {
+		if parsed, err := time.Parse("2006-01-02", startDateStr); err == nil {
+			startDate = parsed
+			if endDateStr == "" {
+				endDate = startDate.Add(24 * time.Hour)
+			}
+		}
+	}
+
+	if endDateStr != "" {
+		if parsed, err := time.Parse("2006-01-02", endDateStr); err == nil {
+			// Ensure end date covers the full day if just date is provided
+			endDate = parsed.Add(24 * time.Hour)
+		}
+	}
+
+	orders, err := h.service.GetOrders(startDate, endDate, scope)
+	if err != nil {
+		return utils.InternalError(c, utils.CodeInternalError, err.Error())
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Orders retrieved", orders)
+}
+
+// GetOrdersByTable handles GET /orders/table/:id
+// Masadaki siparişleri getirir
+func (h *OrderHandler) GetOrdersByTable(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Table ID")
+	}
+
+	orders, err := h.service.GetOrdersByTable(uint(id))
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeResourceNotFound, "Orders not found")
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Table orders", orders)
+}
+
 type CloseOrderRequest struct {
 	PaymentMethod string `json:"payment_method" validate:"required,oneof=CASH CREDIT_CARD"`
 }
@@ -142,4 +208,19 @@ func (h *OrderHandler) RemoveItem(c *fiber.Ctx) error {
 	}
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Item removed successfully", nil)
+}
+
+// Cancel handles DELETE /orders/:id
+// Siparişi iptal eder (siler)
+func (h *OrderHandler) Cancel(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Order ID")
+	}
+
+	if err := h.service.CancelOrder(uint(id)); err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, err.Error())
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Order cancelled successfully", nil)
 }

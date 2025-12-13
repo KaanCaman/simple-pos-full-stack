@@ -9,4 +9,5 @@ const (
 	CodeAuthorized        = "AUTHORIZED"
 	CodeUnauthorized      = "UNAUTHORIZED"
 	CodeRateLimitExceeded = "RATE_LIMIT_EXCEEDED"
+	CodeNotFound          = "NOT_FOUND"
 )

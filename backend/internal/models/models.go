@@ -66,6 +66,7 @@ type Table struct {
 	Name           string `gorm:"size:50;uniqueIndex;not null" json:"name" validate:"required"`
 	Status         string `gorm:"size:20;default:'available'" json:"status" validate:"oneof=available occupied reserved"`
 	CurrentOrderID *uint  `json:"current_order_id,omitempty"`
+	OrderCount     int64  `gorm:"->" json:"order_count"` // Virtual field for active order count, -> means ReadOnly
 }
 
 // Order Status Enum
@@ -89,6 +90,7 @@ type Order struct {
 	WorkPeriodID  uint        `gorm:"index" json:"work_period_id"`                      // Link to WorkPeriod
 	TableID       *uint       `json:"table_id"`
 	WaiterID      *uint       `json:"waiter_id"`
+	Waiter        *User       `json:"waiter,omitempty"`
 	Status        string      `gorm:"size:20;default:'open'" json:"status" validate:"oneof=open completed cancelled"`
 	Subtotal      int64       `gorm:"default:0" json:"subtotal"` // Sum of items subtotal
 	TaxAmount     int64       `gorm:"default:0" json:"tax_amount"`
@@ -157,6 +159,12 @@ type WorkPeriod struct {
 	EndTime   *time.Time `json:"end_time"`
 	IsActive  bool       `gorm:"default:true" json:"is_active"`
 	ClosedBy  uint       `json:"closed_by"` // UserID
+
+	// Stats (Calculated on close)
+	TotalSales    int64 `gorm:"default:0" json:"total_sales"`
+	TotalOrders   int   `gorm:"default:0" json:"total_orders"`
+	TotalExpenses int64 `gorm:"default:0" json:"total_expenses"`
+	NetProfit     int64 `gorm:"default:0" json:"net_profit"`
 }
 
 // HOOKS

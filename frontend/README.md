@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# Simple POS Full Stack - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend application for the Simple POS system, built with React, TypeScript, and Vite. This application provides a responsive interface for managing orders, tables, and reports.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **State Management**: [MobX](https://mobx.js.org/) (with `mobx-react-lite`)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Localization**: [i18next](https://www.i18next.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Routing**: [React Router](https://reactrouter.com/)
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js (v18 or higher)
+- npm or pnpm
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1.  **Install Dependencies**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+    ```bash
+    npm install
+    ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+2.  **Environment Setup**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+    Copy the example environment file and configure it:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Run Development Server**
+
+    ```bash
+    npm run dev
+    ```
+
+    The application will be available at `http://localhost:5173`.
+
+4.  **Build for Production**
+
+    ```bash
+    npm run build
+    ```
+
+## Project Structure
+
+```
+src/
+├── components/         # Shared UI components
+├── constants/          # App constants and configuration
+├── features/           # Feature-based modules
+│   ├── auth/           # Authentication feature
+│   ├── dashboard/      # Dashboard and statistics
+│   ├── pos/            # Point of Sale interface
+│   ├── reports/        # Reporting and history
+│   └── settings/       # Application settings
+├── hooks/              # Custom React hooks
+├── locales/            # i18n translation files
+├── services/           # API services and data fetching
+├── stores/             # MobX stores for global state
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Design System
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The application follows a mobile-first responsive design approach.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Colors**: Defined in `tailwind.config.js` with semantic naming.
+- **Dark Mode**: Fully supported via Tailwind's `dark` variant.
+
+## Localization
+
+Translations are managed in `src/locales/`. The default language is Turkish (`tr`).
+To add a new key, update `src/locales/tr.json` and use the `useTranslation` hook in components:
+
+```tsx
+const { t } = useTranslation();
+<h1>{t("section.key")}</h1>;
 ```
+

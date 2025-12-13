@@ -5,6 +5,8 @@ import (
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
 	"simple-pos/pkg/logger"
+	"strconv"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,14 +17,16 @@ type OrderService struct {
 	transactionRepo repositories.TransactionRepository
 	workPeriodRepo  repositories.WorkPeriodRepository
 	productRepo     repositories.ProductRepository
+	tableRepo       repositories.TableRepository
 }
 
-func NewOrderService(orderRepo repositories.OrderRepository, txRepo repositories.TransactionRepository, wpRepo repositories.WorkPeriodRepository, prodRepo repositories.ProductRepository) *OrderService {
+func NewOrderService(orderRepo repositories.OrderRepository, txRepo repositories.TransactionRepository, wpRepo repositories.WorkPeriodRepository, prodRepo repositories.ProductRepository, tableRepo repositories.TableRepository) *OrderService {
 	return &OrderService{
 		orderRepo:       orderRepo,
 		transactionRepo: txRepo,
 		workPeriodRepo:  wpRepo,
 		productRepo:     prodRepo,
+		tableRepo:       tableRepo,
 	}
 }
 
@@ -34,8 +38,8 @@ func (s *OrderService) AddOrderItem(orderID uint, productID uint, quantity int, 
 	if err != nil {
 		return nil, err
 	}
-	if order.Status != "OPEN" {
-		return nil, errors.New("cannot modify closed order")
+	if order.Status != "OPEN" && order.Status != "COMPLETED" {
+		return nil, errors.New("cannot modify cancelled order")
 	}
 
 	// 2. Fetch Product (for Price snapshot)
@@ -60,6 +64,12 @@ func (s *OrderService) AddOrderItem(orderID uint, productID uint, quantity int, 
 		return nil, err
 	}
 
+	if order.Status == "COMPLETED" {
+		if err := s.syncTransactionAmount(orderID); err != nil {
+			logger.Error("Failed to sync transaction amount", logger.Err(err))
+		}
+	}
+
 	return item, nil
 }
 
@@ -71,8 +81,8 @@ func (s *OrderService) UpdateItemQuantity(orderID, itemID uint, quantity int) er
 	if err != nil {
 		return err
 	}
-	if order.Status != "OPEN" {
-		return errors.New("cannot modify closed order")
+	if order.Status != "OPEN" && order.Status != "COMPLETED" {
+		return errors.New("cannot modify cancelled order")
 	}
 
 	// 2. Fetch Item
@@ -94,6 +104,12 @@ func (s *OrderService) UpdateItemQuantity(orderID, itemID uint, quantity int) er
 		return err
 	}
 
+	if order.Status == "COMPLETED" {
+		if err := s.syncTransactionAmount(orderID); err != nil {
+			logger.Error("Failed to sync transaction amount", logger.Err(err))
+		}
+	}
+
 	return nil
 }
 
@@ -105,8 +121,8 @@ func (s *OrderService) RemoveOrderItem(orderID, itemID uint) error {
 	if err != nil {
 		return err
 	}
-	if order.Status != "OPEN" {
-		return errors.New("cannot modify closed order")
+	if order.Status != "OPEN" && order.Status != "COMPLETED" {
+		return errors.New("cannot modify cancelled order")
 	}
 
 	// 2. Validate Item Ownership
@@ -123,6 +139,12 @@ func (s *OrderService) RemoveOrderItem(orderID, itemID uint) error {
 	// We pass the full item so the Hook knows the OrderID
 	if err := s.orderRepo.DeleteItem(item); err != nil {
 		return err
+	}
+
+	if order.Status == "COMPLETED" {
+		if err := s.syncTransactionAmount(orderID); err != nil {
+			logger.Error("Failed to sync transaction amount", logger.Err(err))
+		}
 	}
 
 	return nil
@@ -154,7 +176,77 @@ func (s *OrderService) CreateOrder(tableID *uint, waiterID uint, orderNumber str
 		return nil, err
 	}
 
+	// Update Table Status if tableID is present
+	if tableID != nil {
+		table, err := s.tableRepo.FindByID(*tableID)
+		if err == nil {
+			table.Status = "occupied"
+			table.CurrentOrderID = &order.ID
+			_ = s.tableRepo.Update(table) // Log error if needed, but don't fail order creation?
+		} else {
+			logger.Error("Failed to find table to update status", logger.Err(err))
+		}
+	}
+
 	return order, nil
+}
+
+// GetOrder fetches order with items
+// Siparişi ve kalemlerini getirir
+func (s *OrderService) GetOrder(id uint) (*models.Order, error) {
+	return s.orderRepo.FindByID(id)
+}
+
+// GetOrdersByTable fetches all open orders for a table
+// Masadaki açık siparişleri getirir
+func (s *OrderService) GetOrdersByTable(tableID uint) ([]models.Order, error) {
+	return s.orderRepo.FindByTableID(tableID, "OPEN")
+}
+
+// GetOrders fetches orders within a date range or active scope
+// Belirli bir tarih aralığındaki veya aktif kapsamdaki siparişleri getirir
+func (s *OrderService) GetOrders(startDate, endDate time.Time, scope string) ([]models.Order, error) {
+	if scope == "active" {
+		activePeriod, err := s.workPeriodRepo.FindActivePeriod()
+		if err != nil {
+			return nil, err
+		}
+		if activePeriod != nil {
+			return s.orderRepo.FindByWorkPeriod(activePeriod.ID)
+		}
+		// If requesting active scope but no active period, return empty
+		return []models.Order{}, nil
+	}
+
+	// Specific Work Period Scope
+	// Belirli Çalışma Dönemi Kapsamı
+	if strings.HasPrefix(scope, "period_") {
+		periodIDStr := strings.TrimPrefix(scope, "period_")
+		periodID, err := strconv.ParseUint(periodIDStr, 10, 32)
+		if err == nil {
+			return s.orderRepo.FindByWorkPeriod(uint(periodID))
+		}
+	}
+
+	// Strict WorkPeriod Logic for History (Date-based) - legacy fallback if strict date needed
+	// ...
+	// Tarih bazlı geçmiş için sıkı çalışma dönemi mantığı
+	// Find WorkPeriods that started on the 'startDate' (assuming single day query)
+	periods, err := s.workPeriodRepo.GetPeriodsByDate(startDate)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(periods) == 0 {
+		return []models.Order{}, nil
+	}
+
+	var ids []uint
+	for _, p := range periods {
+		ids = append(ids, p.ID)
+	}
+
+	return s.orderRepo.FindByWorkPeriodIDs(ids)
 }
 
 // CloseOrder completes payment and records revenue logic (ACID)
@@ -207,6 +299,37 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 			return err
 		}
 
+		// Update Table Status when order is closed (Need to check if any other open orders exist)
+		// Sipariş kapatıldığında masa durumunu güncelle (Başka açık sipariş olup olmadığını kontrol et)
+		if order.TableID != nil {
+			// Find OPEN orders for this table, using the TX to be safe (though Repo uses separate DB instance usually,
+			// using repository method directly is cleaner if transaction context is not strictly required for read).
+			// Ideally we use tx to count.
+			// WORKAROUND: We assume strict consistency isn't violated by a slight race here for table status in MVP.
+			// Correct way: Check count of OPEN orders where ID != closedOrderID.
+			// Since we just marked this one COMPLETED in TX, FindByTableID("OPEN") should return remaining.
+
+			// Note: order_repo.FindByTableID uses s.orderRepo.db which is outside this TX.
+			// So it might still see the old status if isolation level is low, OR if we haven't committed.
+			// But we updated `order` using `tx.Save`.
+			// So `tx` knows it is COMPLETED.
+			// But `FindByTableID` uses `r.db`.
+			// We should probably just assume if this was the last one, clear table.
+
+			// Better: Execute query using TX.
+			var count int64
+			tx.Model(&models.Order{}).Where("table_id = ? AND status = ?", *order.TableID, "OPEN").Count(&count)
+
+			if count == 0 {
+				var table models.Table
+				if err := tx.First(&table, *order.TableID).Error; err == nil {
+					table.Status = "available"
+					table.CurrentOrderID = nil
+					tx.Save(&table)
+				}
+			}
+		}
+
 		logger.Info("Order closed and transaction recorded",
 			logger.Int("order_id", int(order.ID)),
 			logger.Int("amount", int(order.TotalAmount)),
@@ -214,4 +337,68 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 
 		return nil
 	})
+}
+
+// CancelOrder cancels (deletes) an OPEN order
+// AÇIK siparişi iptal eder (siler)
+func (s *OrderService) CancelOrder(orderID uint) error {
+	order, err := s.orderRepo.FindByID(orderID)
+	if err != nil {
+		return err
+	}
+
+	if order.Status != "OPEN" {
+		return errors.New("cannot cancel closed order")
+	}
+
+	// Delete
+	if err := s.orderRepo.Delete(orderID); err != nil {
+		return err
+	}
+
+	// Check if Table needs to be freed
+	if order.TableID != nil {
+		// Check remaining open orders
+		orders, err := s.orderRepo.FindByTableID(*order.TableID, "OPEN")
+		if err == nil && len(orders) == 0 {
+			table, err := s.tableRepo.FindByID(*order.TableID)
+			if err == nil {
+				table.Status = "available"
+				table.CurrentOrderID = nil
+				s.tableRepo.Update(table)
+			}
+		} else if err == nil && len(orders) > 0 {
+			// If we deleted the "CurrentOrderID" one, switch to another
+			table, err := s.tableRepo.FindByID(*order.TableID)
+			if err == nil && table.CurrentOrderID != nil && *table.CurrentOrderID == orderID {
+				table.CurrentOrderID = &orders[0].ID
+				s.tableRepo.Update(table)
+			}
+		}
+	}
+
+	return nil
+}
+
+// syncTransactionAmount updates the linked transaction amount when a closed order is modified
+func (s *OrderService) syncTransactionAmount(orderID uint) error {
+	// Re-fetch order to get updated total
+	order, err := s.orderRepo.FindByID(orderID)
+	if err != nil {
+		return err
+	}
+
+	// Find transaction
+	tx, err := s.transactionRepo.FindByOrderID(orderID)
+	if err != nil {
+		// Possibly no transaction if 0 amount or issue. Log but don't hard fail?
+		return err
+	}
+
+	if tx.Amount != order.TotalAmount {
+		tx.Amount = order.TotalAmount
+		return s.transactionRepo.Update(tx)
+	}
+
+	return nil
 }

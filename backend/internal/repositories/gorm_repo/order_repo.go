@@ -3,6 +3,7 @@ package gorm_repo
 import (
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -19,18 +20,72 @@ func (r *orderRepository) Create(order *models.Order) error {
 	return r.db.Create(order).Error
 }
 
+func (r *orderRepository) FindAll(startDate, endDate time.Time) ([]models.Order, error) {
+	var orders []models.Order
+	if err := r.db.Preload("Items").Preload("Waiter").
+		Where("created_at >= ? AND created_at <= ?", startDate, endDate).
+		Order("created_at desc").
+		Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
 func (r *orderRepository) FindByID(id uint) (*models.Order, error) {
 	var order models.Order
-	if err := r.db.Preload("Items").First(&order, id).Error; err != nil {
+	if err := r.db.Preload("Items").Preload("Waiter").First(&order, id).Error; err != nil {
 		return nil, err
 	}
 	return &order, nil
+}
+
+func (r *orderRepository) FindByTableID(tableID uint, status string) ([]models.Order, error) {
+	var orders []models.Order
+	query := r.db.Preload("Items").Preload("Waiter").Where("table_id = ?", tableID)
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	if err := query.Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (r *orderRepository) FindByWorkPeriod(periodID uint) ([]models.Order, error) {
+	var orders []models.Order
+	if err := r.db.Preload("Items").Preload("Waiter").
+		Where("work_period_id = ?", periodID).
+		Order("created_at desc").
+		Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (r *orderRepository) FindByWorkPeriodIDs(periodIDs []uint) ([]models.Order, error) {
+	var orders []models.Order
+	if len(periodIDs) == 0 {
+		return []models.Order{}, nil
+	}
+	if err := r.db.Preload("Items").Preload("Waiter").
+		Where("work_period_id IN ?", periodIDs).
+		Order("created_at desc").
+		Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
 
 // Update an order
 // Siparişi günceller
 func (r *orderRepository) Update(order *models.Order) error {
 	return r.db.Save(order).Error
+}
+
+// Delete an order
+// Siparişi siler
+func (r *orderRepository) Delete(id uint) error {
+	return r.db.Delete(&models.Order{}, id).Error
 }
 
 // AddItem adds an item to order
