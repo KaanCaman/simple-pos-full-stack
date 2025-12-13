@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import {
   reportService,
@@ -9,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, ArrowRight } from "lucide-react";
 
 export const ReportHistoryPage = observer(() => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [reports, setReports] = useState<WorkPeriodHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,9 @@ export const ReportHistoryPage = observer(() => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">Yükleniyor...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500">{t("common.loading")}</div>
+    );
   }
 
   return (
@@ -40,14 +44,14 @@ export const ReportHistoryPage = observer(() => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Calendar className="h-8 w-8 text-blue-500" />
-          Geçmiş Çalışma Dönemleri
+          {t("reports.past_work_periods")}
         </h1>
       </div>
 
       <div className="bg-white dark:bg-[#1A1D1F] rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
         {reports.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
-            Henüz kaydedilmiş rapor bulunmuyor.
+            {t("reports.no_reports_history")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -55,16 +59,16 @@ export const ReportHistoryPage = observer(() => {
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800/50 text-left">
                   <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Dönem / Tarih
+                    {t("reports.period_date")}
                   </th>
                   <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
-                    Toplam Satış
+                    {t("reports.total_sales")}
                   </th>
                   <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
-                    Giderler
+                    {t("reports.expenses")}
                   </th>
                   <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
-                    Net Kar
+                    {t("reports.net_profit")}
                   </th>
                   <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {/* Action */}
@@ -104,7 +108,7 @@ export const ReportHistoryPage = observer(() => {
                                 "tr-TR",
                                 { hour: "2-digit", minute: "2-digit" }
                               )
-                            : "Aktif"}
+                            : t("reports.active")}
                         </span>
                       </div>
                     </td>

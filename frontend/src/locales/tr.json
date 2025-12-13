@@ -159,6 +159,7 @@
   },
   "reports": {
     "title": "Günlük Rapor (Canlı)",
+    "past_work_periods": "Geçmiş Çalışma Dönemleri",
     "history_title": "Geçmiş Gün Raporu",
     "back_to_list": "Listeye Dön",
     "history_reports": "Geçmiş Raporlar",
@@ -180,6 +181,9 @@
     "end_day_error": "Gün kapatılamadı.",
     "report_not_found": "Rapor Bulunamadı",
     "report_not_found_desc": "Veriler yüklenirken bir sorun oluştu veya bu tarih için kayıt bulunmuyor. Lütfen sayfayı yenilemeyi deneyin.",
+    "no_reports_history": "Henüz kaydedilmiş rapor bulunmuyor.",
+    "period_date": "Dönem / Tarih",
+    "active": "Aktif",
     "refresh": "Yenile"
   },
   "errors": {
