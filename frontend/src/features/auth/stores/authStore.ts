@@ -13,6 +13,8 @@ export class AuthStore {
   @observable isLoading: boolean = false;
   @observable error: string | null = null;
 
+  @observable isDayOpen: boolean = false;
+
   rootStore: RootStore;
 
   constructor(rootStore: RootStore) {
@@ -31,11 +33,28 @@ export class AuthStore {
   @action
   loadToken() {
     const token = localStorage.getItem("token");
+    const dayStatus = localStorage.getItem("isDayOpen") === "true"; // Mock persistence
+
     if (token) {
       this.token = token;
       this.isAuthenticated = true;
+      this.isDayOpen = dayStatus;
       api.setToken(token);
     }
+  }
+
+  @action
+  startDay() {
+    this.isDayOpen = true;
+    localStorage.setItem("isDayOpen", "true");
+    logger.info("Day started", undefined, "AuthStore");
+  }
+
+  @action
+  endDay() {
+    this.isDayOpen = false;
+    localStorage.setItem("isDayOpen", "false");
+    logger.info("Day ended", undefined, "AuthStore");
   }
 
   // Login action.

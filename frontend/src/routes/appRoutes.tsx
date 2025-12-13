@@ -10,6 +10,8 @@ import { DashboardPage } from "../features/dashboard/components/DashboardPage";
 import { OrderPage } from "../features/pos/components/OrderPage";
 import { HistoryPage } from "../features/reports/components/HistoryPage";
 import { SettingsPage } from "../features/settings/components/SettingsPage";
+import { StartDayPage } from "../features/dashboard/components/StartDayPage";
+import { DayGuard } from "../components/DayGuard";
 
 // Root layout component that includes global providers/components.
 // Küresel sağlayıcıları/bileşenleri içeren kök düzen bileşeni.
@@ -25,7 +27,7 @@ const RootLayout = () => {
 
 // Application routes configuration using Router v7 Data API.
 // Router v7 Veri API'sini kullanan uygulama rotaları yapılandırması.
-export const router = createBrowserRouter([
+export const appRoutes = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
@@ -43,7 +45,11 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            element: <MainLayout />,
+            element: (
+              <DayGuard>
+                <MainLayout />
+              </DayGuard>
+            ),
             children: [
               {
                 index: true,
@@ -61,8 +67,11 @@ export const router = createBrowserRouter([
                 path: "settings",
                 element: <SettingsPage />,
               },
-              // Other protected routes will go here
             ],
+          },
+          {
+            path: "start-day",
+            element: <StartDayPage />,
           },
         ],
       },
@@ -70,6 +79,6 @@ export const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <div>404 Not Found</div>, // Temporary 404
+    element: <div>404 Not Found</div>,
   },
 ]);

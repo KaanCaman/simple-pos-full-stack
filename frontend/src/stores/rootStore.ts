@@ -27,3 +27,5 @@ export const useRootStore = () => {
   }
   return context;
 };
+
+export const useStore = useRootStore;
