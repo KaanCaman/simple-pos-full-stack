@@ -15,14 +15,16 @@ type OrderService struct {
 	transactionRepo repositories.TransactionRepository
 	workPeriodRepo  repositories.WorkPeriodRepository
 	productRepo     repositories.ProductRepository
+	tableRepo       repositories.TableRepository
 }
 
-func NewOrderService(orderRepo repositories.OrderRepository, txRepo repositories.TransactionRepository, wpRepo repositories.WorkPeriodRepository, prodRepo repositories.ProductRepository) *OrderService {
+func NewOrderService(orderRepo repositories.OrderRepository, txRepo repositories.TransactionRepository, wpRepo repositories.WorkPeriodRepository, prodRepo repositories.ProductRepository, tableRepo repositories.TableRepository) *OrderService {
 	return &OrderService{
 		orderRepo:       orderRepo,
 		transactionRepo: txRepo,
 		workPeriodRepo:  wpRepo,
 		productRepo:     prodRepo,
+		tableRepo:       tableRepo,
 	}
 }
 
@@ -154,7 +156,31 @@ func (s *OrderService) CreateOrder(tableID *uint, waiterID uint, orderNumber str
 		return nil, err
 	}
 
+	// Update Table Status if tableID is present
+	if tableID != nil {
+		table, err := s.tableRepo.FindByID(*tableID)
+		if err == nil {
+			table.Status = "occupied"
+			table.CurrentOrderID = &order.ID
+			_ = s.tableRepo.Update(table) // Log error if needed, but don't fail order creation?
+		} else {
+			logger.Error("Failed to find table to update status", logger.Err(err))
+		}
+	}
+
 	return order, nil
+}
+
+// GetOrder fetches order with items
+// Siparişi ve kalemlerini getirir
+func (s *OrderService) GetOrder(id uint) (*models.Order, error) {
+	return s.orderRepo.FindByID(id)
+}
+
+// GetOrdersByTable fetches all open orders for a table
+// Masadaki açık siparişleri getirir
+func (s *OrderService) GetOrdersByTable(tableID uint) ([]models.Order, error) {
+	return s.orderRepo.FindByTableID(tableID, "OPEN")
 }
 
 // CloseOrder completes payment and records revenue logic (ACID)
@@ -207,6 +233,37 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 			return err
 		}
 
+		// Update Table Status when order is closed (Need to check if any other open orders exist)
+		// Sipariş kapatıldığında masa durumunu güncelle (Başka açık sipariş olup olmadığını kontrol et)
+		if order.TableID != nil {
+			// Find OPEN orders for this table, using the TX to be safe (though Repo uses separate DB instance usually,
+			// using repository method directly is cleaner if transaction context is not strictly required for read).
+			// Ideally we use tx to count.
+			// WORKAROUND: We assume strict consistency isn't violated by a slight race here for table status in MVP.
+			// Correct way: Check count of OPEN orders where ID != closedOrderID.
+			// Since we just marked this one COMPLETED in TX, FindByTableID("OPEN") should return remaining.
+
+			// Note: order_repo.FindByTableID uses s.orderRepo.db which is outside this TX.
+			// So it might still see the old status if isolation level is low, OR if we haven't committed.
+			// But we updated `order` using `tx.Save`.
+			// So `tx` knows it is COMPLETED.
+			// But `FindByTableID` uses `r.db`.
+			// We should probably just assume if this was the last one, clear table.
+
+			// Better: Execute query using TX.
+			var count int64
+			tx.Model(&models.Order{}).Where("table_id = ? AND status = ?", *order.TableID, "OPEN").Count(&count)
+
+			if count == 0 {
+				var table models.Table
+				if err := tx.First(&table, *order.TableID).Error; err == nil {
+					table.Status = "available"
+					table.CurrentOrderID = nil
+					tx.Save(&table)
+				}
+			}
+		}
+
 		logger.Info("Order closed and transaction recorded",
 			logger.Int("order_id", int(order.ID)),
 			logger.Int("amount", int(order.TotalAmount)),
@@ -214,4 +271,45 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 
 		return nil
 	})
+}
+
+// CancelOrder cancels (deletes) an OPEN order
+// AÇIK siparişi iptal eder (siler)
+func (s *OrderService) CancelOrder(orderID uint) error {
+	order, err := s.orderRepo.FindByID(orderID)
+	if err != nil {
+		return err
+	}
+
+	if order.Status != "OPEN" {
+		return errors.New("cannot cancel closed order")
+	}
+
+	// Delete
+	if err := s.orderRepo.Delete(orderID); err != nil {
+		return err
+	}
+
+	// Check if Table needs to be freed
+	if order.TableID != nil {
+		// Check remaining open orders
+		orders, err := s.orderRepo.FindByTableID(*order.TableID, "OPEN")
+		if err == nil && len(orders) == 0 {
+			table, err := s.tableRepo.FindByID(*order.TableID)
+			if err == nil {
+				table.Status = "available"
+				table.CurrentOrderID = nil
+				s.tableRepo.Update(table)
+			}
+		} else if err == nil && len(orders) > 0 {
+			// If we deleted the "CurrentOrderID" one, switch to another
+			table, err := s.tableRepo.FindByID(*order.TableID)
+			if err == nil && table.CurrentOrderID != nil && *table.CurrentOrderID == orderID {
+				table.CurrentOrderID = &orders[0].ID
+				s.tableRepo.Update(table)
+			}
+		}
+	}
+
+	return nil
 }

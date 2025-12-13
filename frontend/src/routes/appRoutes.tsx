@@ -8,6 +8,7 @@ import { MainLayout } from "../layouts/MainLayout";
 import { InactivityTracker } from "../components/InactivityTracker";
 import { DashboardPage } from "../features/dashboard/components/DashboardPage";
 import { OrderPage } from "../features/pos/components/OrderPage";
+import { POSPage } from "../features/pos/components/POSPage";
 import { HistoryPage } from "../features/reports/components/HistoryPage";
 import { SettingsPage } from "../features/settings/components/SettingsPage";
 import { StartDayPage } from "../features/dashboard/components/StartDayPage";
@@ -66,6 +67,10 @@ export const appRoutes = createBrowserRouter([
               {
                 path: "settings",
                 element: <SettingsPage />,
+              },
+              {
+                path: "pos",
+                element: <POSPage />,
               },
             ],
           },

@@ -1,7 +1,7 @@
 import { makeObservable, observable, action, runInAction } from "mobx";
 import { categoryService } from "../services/categoryService";
 import type { Category, CreateCategoryRequest } from "../../../types/inventory";
-import { RootStore } from "../../../stores/rootStore";
+import type { RootStore } from "../../../stores/rootStore";
 
 export class CategoryStore {
   @observable categories: Category[] = [];

@@ -44,6 +44,38 @@ func (h *OrderHandler) Create(c *fiber.Ctx) error {
 	return utils.Success(c, fiber.StatusCreated, utils.CodeOK, "Order created", order)
 }
 
+// GetOrder handles GET /orders/:id
+// Sipariş detaylarını getirir
+func (h *OrderHandler) GetOrder(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Order ID")
+	}
+
+	order, err := h.service.GetOrder(uint(id))
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeResourceNotFound, "Order not found")
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Order details", order)
+}
+
+// GetOrdersByTable handles GET /orders/table/:id
+// Masadaki siparişleri getirir
+func (h *OrderHandler) GetOrdersByTable(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Table ID")
+	}
+
+	orders, err := h.service.GetOrdersByTable(uint(id))
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeResourceNotFound, "Orders not found")
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Table orders", orders)
+}
+
 type CloseOrderRequest struct {
 	PaymentMethod string `json:"payment_method" validate:"required,oneof=CASH CREDIT_CARD"`
 }
@@ -142,4 +174,19 @@ func (h *OrderHandler) RemoveItem(c *fiber.Ctx) error {
 	}
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Item removed successfully", nil)
+}
+
+// Cancel handles DELETE /orders/:id
+// Siparişi iptal eder (siler)
+func (h *OrderHandler) Cancel(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Order ID")
+	}
+
+	if err := h.service.CancelOrder(uint(id)); err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, err.Error())
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Order cancelled successfully", nil)
 }

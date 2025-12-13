@@ -6,7 +6,7 @@ import type {
   UpdateTableRequest,
 } from "../../../types/operation";
 import { logger } from "../../../utils/logger";
-import { RootStore } from "../../../stores/rootStore";
+import type { RootStore } from "../../../stores/rootStore";
 
 export class TableStore {
   @observable tables: Table[] = [];

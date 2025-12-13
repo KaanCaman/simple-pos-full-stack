@@ -30,7 +30,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	categoryService := services.NewCategoryService(categoryRepo)
 	productService := services.NewProductService(productRepo)
 	transactionService := services.NewTransactionService(transactionRepo, workPeriodRepo)
-	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo, productRepo)
+	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo, productRepo, tableRepo)
 	analyticsService := services.NewAnalyticsService(db, transactionRepo)
 	userService := services.NewUserService(userRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
@@ -63,6 +63,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	// Protected Routes (Waiter + Admin)
 	protected := api.Group("/", middleware.Protected())
 
+	// Auth Persistence
+	protected.Get("/auth/me", authHandler.Me)
+
 	// Tables (Read-Only Public/Protected) - Waiters need to see tables.
 	protected.Get("/tables", tableHandler.ListTables)
 
@@ -72,7 +75,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	protected.Post("/orders/:id/items", orderHandler.AddItem)
 	protected.Put("/orders/:id/items/:itemId", orderHandler.UpdateItem)
 	protected.Delete("/orders/:id/items/:itemId", orderHandler.RemoveItem)
-
+	protected.Delete("/orders/:id", orderHandler.Cancel)
+	protected.Get("/orders/:id", orderHandler.GetOrder)
+	protected.Get("/orders/table/:id", orderHandler.GetOrdersByTable)
 	// Admin Routes
 	admin := protected.Group("/", middleware.RequireRole("admin"))
 

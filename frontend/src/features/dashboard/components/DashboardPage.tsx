@@ -85,6 +85,22 @@ export const DashboardPage = observer(() => {
         />
       </div>
 
+      {/* Quick Actions */}
+      <div
+        onClick={() => navigate("/pos")}
+        className="bg-primary-500 rounded-2xl p-6 text-white cursor-pointer shadow-lg shadow-primary-500/20 hover:scale-[1.01] transition-transform active:scale-[0.99] flex items-center justify-between"
+      >
+        <div>
+          <h2 className="text-2xl font-bold mb-1">Satış Ekranını Aç</h2>
+          <p className="text-primary-100">
+            Yeni sipariş oluşturmak veya varolanları yönetmek için tıklayın.
+          </p>
+        </div>
+        <div className="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center">
+          <Store className="h-6 w-6 text-white" />
+        </div>
+      </div>
+
       {/* Floor Overview Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">

@@ -20,6 +20,7 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "dashboard.menu.dashboard", path: "/" },
+    { icon: UtensilsCrossed, label: "dashboard.menu.pos", path: "/pos" },
     { icon: History, label: "dashboard.menu.history", path: "/history" },
     { icon: Settings, label: "dashboard.menu.settings", path: "/settings" },
   ];

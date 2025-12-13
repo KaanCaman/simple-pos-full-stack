@@ -1,5 +1,5 @@
 import { makeObservable, observable, action } from "mobx";
-import { RootStore } from "./rootStore";
+import type { RootStore } from "./rootStore";
 
 interface ConfirmationOptions {
   title: string;

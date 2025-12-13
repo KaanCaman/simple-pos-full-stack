@@ -49,3 +49,9 @@ func (s *AuthService) Login(username string, password string) (user *models.User
 	}
 	return user, token, nil
 }
+
+// GetUser returns user by ID
+// ID ile kullanıcı döndürür
+func (s *AuthService) GetUser(id uint) (*models.User, error) {
+	return s.userRepo.FindByID(id)
+}

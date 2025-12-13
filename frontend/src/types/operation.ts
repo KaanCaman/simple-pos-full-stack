@@ -8,6 +8,7 @@ export interface Table extends BaseEntity {
   name: string;
   status: TableStatus;
   current_order_id?: number;
+  order_count?: number;
 }
 
 export interface CreateTableRequest {
@@ -29,10 +30,11 @@ export interface Order extends BaseEntity {
   total_amount: number;
   payment_method: PaymentMethod;
   completed_at: string | null;
+  items?: OrderItem[]; // Response often includes items
 }
 
 export interface CreateOrderRequest {
-  table_id: number;
+  table_id?: number;
   waiter_id: number;
 }
 
@@ -43,11 +45,13 @@ export interface OrderItem extends BaseEntity {
   quantity: number;
   unit_price: number;
   subtotal: number;
+  note?: string;
 }
 
 export interface AddOrderItemRequest {
   product_id: number;
   quantity: number;
+  note?: string;
 }
 
 export interface UpdateOrderItemRequest {

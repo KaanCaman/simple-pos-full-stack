@@ -14,6 +14,10 @@ class AuthService extends BaseService {
       password,
     });
   }
+
+  public async me() {
+    return this.get<ApiResponse<any>>("/auth/me");
+  }
 }
 
 export const authService = new AuthService();

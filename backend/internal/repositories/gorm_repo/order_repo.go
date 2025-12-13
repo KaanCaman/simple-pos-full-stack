@@ -27,10 +27,28 @@ func (r *orderRepository) FindByID(id uint) (*models.Order, error) {
 	return &order, nil
 }
 
+func (r *orderRepository) FindByTableID(tableID uint, status string) ([]models.Order, error) {
+	var orders []models.Order
+	query := r.db.Preload("Items").Where("table_id = ?", tableID)
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	if err := query.Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
 // Update an order
 // Siparişi günceller
 func (r *orderRepository) Update(order *models.Order) error {
 	return r.db.Save(order).Error
+}
+
+// Delete an order
+// Siparişi siler
+func (r *orderRepository) Delete(id uint) error {
+	return r.db.Delete(&models.Order{}, id).Error
 }
 
 // AddItem adds an item to order

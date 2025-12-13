@@ -2,7 +2,7 @@ import { makeObservable, observable, action, runInAction } from "mobx";
 import { api } from "../../../api/axios";
 import { managementService } from "../../dashboard/services/managementService";
 import { authService } from "../services/authService";
-import { RootStore } from "../../../stores/rootStore";
+import type { RootStore } from "../../../stores/rootStore";
 import { logger } from "../../../utils/logger";
 import type { User, UserRole } from "../../../types/auth";
 
@@ -38,22 +38,29 @@ export class AuthStore {
 
     if (token) {
       this.token = token;
-      this.isAuthenticated = true;
+      this.isAuthenticated = true; // Optimistic
       api.setToken(token);
 
       try {
-        // Verify token and get fresh day status
-        const response = await managementService.getDayStatus();
+        // Fetch user details from API
+        const response = await authService.me();
         const { data } = response.data;
 
         runInAction(() => {
+          this.user = {
+            id: data.userID,
+            created_at: new Date().toISOString(), // Mock
+            updated_at: new Date().toISOString(),
+            deleted_at: null,
+            name: data.name,
+            role: data.role as UserRole,
+            is_active: true,
+          };
           this.isDayOpen = data.is_day_open;
-          // Optionally preserve persistence as fallback or just trust API
           localStorage.setItem("isDayOpen", String(data.is_day_open));
         });
       } catch (error) {
-        // If status check fails (e.g. 401), logout
-        logger.error("Failed to verify session status", { error }, "AuthStore");
+        logger.error("Failed to restore session", { error }, "AuthStore");
         this.logout();
       } finally {
         runInAction(() => {

@@ -5,7 +5,7 @@ import type {
   CreateProductRequest,
   UpdateProductRequest,
 } from "../../../types/inventory";
-import { RootStore } from "../../../stores/rootStore";
+import type { RootStore } from "../../../stores/rootStore";
 
 export class ProductStore {
   @observable products: Product[] = [];

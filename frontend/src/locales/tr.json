@@ -13,23 +13,48 @@
   "dashboard": {
     "menu": {
       "dashboard": "Panel",
+      "pos": "Sipariş (POS)",
       "history": "Geçmiş",
       "settings": "Ayarlar"
-    },
-    "stats": {
-      "total_tables": "Toplam Masa",
-      "occupied": "Dolu",
-      "available": "Boş"
-    },
-    "table_status": {
-      "dining": "Yemekte",
-      "locked": "Kilitli",
-      "available": "Boş"
     },
     "floor": {
       "ground": "Zemin Kat",
       "terrace": "Teras"
     }
+  },
+  "pos": {
+    "table_selection": "Masa Seçimi",
+    "occupied": "Dolu",
+    "empty": "Boş",
+    "user_not_found": "Kullanıcı bulunamadı",
+    "all_categories": "Tümü",
+    "search_placeholder": "Ürün ara...",
+    "no_order": "Sipariş yok",
+    "back_to_tables": "Masalara Dön",
+    "table": "Masa",
+    "subtotal": "Ara Toplam",
+    "pay_cash": "Nakit",
+    "pay_credit": "Kredi Kartı",
+    "confirm_remove_item": "Ürünü siparişten kaldırmak istiyor musunuz?",
+    "confirm_remove_title": "Ürün Sil",
+    "confirm_checkout_title": "Siparişi Kapat",
+    "confirm_checkout_message": "Siparişi {{method}} ile kapatmak istiyor musunuz?",
+    "checkout_success": "Sipariş kapatıldı",
+    "add_order": "Sipariş Ekle",
+    "open_orders": "Açık Siparişler",
+    "no_category": "Diğer",
+    "total": "Tutar",
+    "total_amount": "Genel Toplam",
+    "quantity": "Adet",
+    "notes": "Notlar",
+    "add_note": "Not Ekle",
+    "clear_order": "TEMİZLE",
+    "discount": "İndirim",
+    "service_charge": "Servis Ücreti",
+    "payment_method": "Ödeme Yöntemi",
+    "select_product": "Sipariş eklemek için ürün seçin",
+    "waiter": "Garson",
+    "order_number": "Sipariş No"
   },
   "auth": {
     "login": "Giriş Yap",

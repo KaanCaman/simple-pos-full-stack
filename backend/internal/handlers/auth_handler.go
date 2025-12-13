@@ -60,3 +60,26 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		"work_period_id": workPeriodID,
 	})
 }
+
+// Me returns the current authenticated user
+// Mevcut kimliği doğrulanmış kullanıcıyı döndürür
+func (h *AuthHandler) Me(c *fiber.Ctx) error {
+	// Get UserID from middleware context (set by Protected middleware)
+	userID := c.Locals("userID").(int)
+
+	user, err := h.service.GetUser(uint(userID))
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeNotFound, "User not found")
+	}
+
+	// Check day status
+	activePeriod, err := h.workPeriodRepo.FindActivePeriod()
+	isDayOpen := activePeriod != nil
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "User details", fiber.Map{
+		"userID":      user.ID,
+		"name":        user.Name,
+		"role":        user.Role,
+		"is_day_open": isDayOpen,
+	})
+}
