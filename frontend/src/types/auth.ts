@@ -10,7 +10,7 @@ export interface LoginResponseData {
   role: string;
   userID: number;
   is_day_open: boolean;
-  work_period_id: number;
+  work_period_id?: number;
 }
 
 export interface WorkDayRequest {

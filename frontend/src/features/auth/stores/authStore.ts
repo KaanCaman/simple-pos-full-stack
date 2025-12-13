@@ -1,10 +1,10 @@
 import { makeObservable, observable, action, runInAction } from "mobx";
 import { api } from "../../../api/axios";
+import { managementService } from "../../dashboard/services/managementService";
+import { authService } from "../services/authService";
 import { RootStore } from "../../../stores/rootStore";
 import { logger } from "../../../utils/logger";
-import type { ApiResponse } from "../../../types/api";
-import type { User, LoginResponseData, UserRole } from "../../../types/auth";
-import { AppEndPoints } from "../../../constants/app";
+import type { User, UserRole } from "../../../types/auth";
 
 export class AuthStore {
   @observable user: User | null = null;
@@ -31,30 +31,72 @@ export class AuthStore {
   // Load token from local storage on initialization.
   // Başlatma sırasında yerel depolamadan belirteci yükle.
   @action
-  loadToken() {
+  async loadToken() {
     const token = localStorage.getItem("token");
-    const dayStatus = localStorage.getItem("isDayOpen") === "true"; // Mock persistence
 
     if (token) {
       this.token = token;
       this.isAuthenticated = true;
-      this.isDayOpen = dayStatus;
       api.setToken(token);
+
+      try {
+        // Verify token and get fresh day status
+        const response = await managementService.getDayStatus();
+        const { data } = response.data;
+
+        runInAction(() => {
+          this.isDayOpen = data.is_day_open;
+          // Optionally preserve persistence as fallback or just trust API
+          localStorage.setItem("isDayOpen", String(data.is_day_open));
+        });
+      } catch (error) {
+        // If status check fails (e.g. 401), logout
+        logger.error("Failed to verify session status", { error }, "AuthStore");
+        this.logout();
+      }
     }
   }
 
   @action
-  startDay() {
-    this.isDayOpen = true;
-    localStorage.setItem("isDayOpen", "true");
-    logger.info("Day started", undefined, "AuthStore");
+  async startDay() {
+    if (!this.user?.id) return;
+    this.isLoading = true;
+    try {
+      await managementService.startDay(this.user.id);
+      runInAction(() => {
+        this.isDayOpen = true;
+        localStorage.setItem("isDayOpen", "true");
+        logger.info("Day started", undefined, "AuthStore");
+      });
+    } catch (error) {
+      logger.error("Failed to start day", { error }, "AuthStore");
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
   }
 
   @action
-  endDay() {
-    this.isDayOpen = false;
-    localStorage.setItem("isDayOpen", "false");
-    logger.info("Day ended", undefined, "AuthStore");
+  async endDay() {
+    if (!this.user?.id) return;
+    this.isLoading = true;
+    try {
+      await managementService.endDay(this.user.id);
+      runInAction(() => {
+        this.isDayOpen = false;
+        localStorage.setItem("isDayOpen", "false");
+        logger.info("Day ended", undefined, "AuthStore");
+      });
+    } catch (error) {
+      logger.error("Failed to end day", { error }, "AuthStore");
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
   }
 
   // Login action.
@@ -64,10 +106,7 @@ export class AuthStore {
     this.isLoading = true;
     this.error = null;
     try {
-      const response = await api.post<ApiResponse<LoginResponseData>>(
-        `${AppEndPoints.LOGIN}`,
-        { username, password }
-      );
+      const response = await authService.login(username, password);
 
       const { data } = response.data;
 
@@ -90,8 +129,9 @@ export class AuthStore {
         } else {
           localStorage.setItem("isDayOpen", "false");
         }
-        localStorage.setItem("token", this.token);
-        api.setToken(this.token);
+        const tokenForApi = this.token || "";
+        localStorage.setItem("token", tokenForApi);
+        api.setToken(tokenForApi);
         logger.info("User logged in", { username }, "AuthStore");
       });
     } catch (err: any) {
