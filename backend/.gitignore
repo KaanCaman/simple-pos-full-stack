@@ -1,0 +1,112 @@
+# ----------------------------
+# Go Build Artifacts
+# ----------------------------
+/bin/
+/build/
+/dist/
+/out/
+/tmp/
+/vendor/
+
+# Common Go build outputs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.a
+
+# macOS build binary (name: main)
+main
+
+# Any Go build output without extension
+*.app
+
+# Go workspace
+go.work
+go.work.sum
+
+# ----------------------------
+# Modules
+# ----------------------------
+/pkg/mod/
+/pkg/sumdb/
+
+# Uncomment next line if you DON’T want go.sum tracked
+go.sum
+
+# ----------------------------
+# SQLite Databases
+# ----------------------------
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+/data/*.db
+
+# ----------------------------
+# Environment & Secrets
+# ----------------------------
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# ----------------------------
+# Logs
+# ----------------------------
+*.log
+/logs/
+
+# ----------------------------
+# Temporary / Cache Files
+# ----------------------------
+*.tmp
+*.temp
+*.cache
+.cache/
+node_modules/
+.fiber*
+
+# ----------------------------
+# IDE / Editor-specific
+# ----------------------------
+
+# VS Code
+.vscode/
+.history/
+
+# JetBrains / GoLand
+.idea/
+*.iml
+
+# Eclipse / IntelliJ
+*.classpath
+*.project
+*.settings/
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+# ----------------------------
+# OS-specific
+# ----------------------------
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux temporary
+*~

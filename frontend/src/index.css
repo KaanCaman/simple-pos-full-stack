@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    /* Using custom color tokens for light mode default */
+    @apply bg-background-primary text-text-primary antialiased;
+  }
+
+  /* Optional: Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
