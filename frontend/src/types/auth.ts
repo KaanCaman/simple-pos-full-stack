@@ -6,9 +6,11 @@ export interface LoginRequest {
 }
 
 export interface LoginResponseData {
-  role: string;
   token: string;
+  role: string;
   userID: number;
+  is_day_open: boolean;
+  work_period_id: number;
 }
 
 export interface WorkDayRequest {

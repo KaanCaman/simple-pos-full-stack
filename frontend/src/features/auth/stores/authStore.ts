@@ -84,6 +84,12 @@ export class AuthStore {
           is_active: true,
         };
         this.isAuthenticated = true;
+        this.isDayOpen = data.is_day_open;
+        if (data.is_day_open) {
+          localStorage.setItem("isDayOpen", "true");
+        } else {
+          localStorage.setItem("isDayOpen", "false");
+        }
         localStorage.setItem("token", this.token);
         api.setToken(this.token);
         logger.info("User logged in", { username }, "AuthStore");

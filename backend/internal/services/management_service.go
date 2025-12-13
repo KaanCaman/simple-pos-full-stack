@@ -122,3 +122,8 @@ func (s *ManagementService) EndDay(userID uint) (*models.DailyReport, error) {
 
 	return report, nil
 }
+
+// GetActivePeriod returns the current active work period or nil if none
+func (s *ManagementService) GetActivePeriod() (*models.WorkPeriod, error) {
+	return s.workPeriodRepo.FindActivePeriod()
+}

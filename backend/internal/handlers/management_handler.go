@@ -34,6 +34,25 @@ func (h *ManagementHandler) StartDay(c *fiber.Ctx) error {
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Work period started successfully", nil)
 }
 
+// GetSystemStatus returns the current status of the system (active work period, etc.)
+func (h *ManagementHandler) GetSystemStatus(c *fiber.Ctx) error {
+	period, err := h.service.GetActivePeriod()
+	if err != nil {
+		return utils.InternalError(c, utils.CodeInternalError, "Failed to check system status")
+	}
+
+	isDayOpen := period != nil
+	var workPeriodID uint
+	if isDayOpen {
+		workPeriodID = period.ID
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "System status retrieved", fiber.Map{
+		"is_day_open":    isDayOpen,
+		"work_period_id": workPeriodID,
+	})
+}
+
 // EndDay handles the end day request
 // Gün sonu isteğini işler
 func (h *ManagementHandler) EndDay(c *fiber.Ctx) error {

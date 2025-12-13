@@ -37,7 +37,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	tableService := services.NewTableService(tableRepo)
 
 	// 6. Initialize Handlers
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, workPeriodRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	productHandler := handlers.NewProductHandler(productService)
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
@@ -107,6 +107,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	management := admin.Group("/management", middleware.RateLimiter(5, time.Minute))
 	management.Post("/start-day", managementHandler.StartDay)
 	management.Post("/end-day", managementHandler.EndDay)
+	management.Get("/status", managementHandler.GetSystemStatus)
 
 	// Analytics Routes (Admin)
 	admin.Get("/analytics/daily", analyticsHandler.GetDailyReport)
