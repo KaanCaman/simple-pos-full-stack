@@ -74,7 +74,7 @@ export const HistoryPage = observer(() => {
               {t("dashboard.menu.history")}
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Geçmiş işlemler ve raporlar
+              {t("reports.history_subtitle")}
             </p>
           </div>
         </div>
@@ -82,11 +82,11 @@ export const HistoryPage = observer(() => {
         <div className="flex gap-3">
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1A1D1F] border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300">
             <Calendar className="h-4 w-4" />
-            <span>Bugün</span>
+            <span>{t("reports.today")}</span>
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors text-sm font-medium shadow-lg shadow-primary-500/20">
             <Download className="h-4 w-4" />
-            <span>Rapor Al</span>
+            <span>{t("reports.get_report")}</span>
           </button>
         </div>
       </div>
@@ -98,22 +98,22 @@ export const HistoryPage = observer(() => {
             <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
               <tr>
                 <th className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                  ID
+                  {t("reports.col_id")}
                 </th>
                 <th className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                  Tarih
+                  {t("reports.col_date")}
                 </th>
                 <th className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                  İşlem
+                  {t("reports.col_transaction")}
                 </th>
                 <th className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                  Detay
+                  {t("reports.col_detail")}
                 </th>
                 <th className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                  Ödeme
+                  {t("reports.col_payment")}
                 </th>
                 <th className="px-6 py-4 font-semibold text-gray-900 dark:text-white text-right">
-                  Tutar
+                  {t("reports.col_amount")}
                 </th>
               </tr>
             </thead>
@@ -137,7 +137,9 @@ export const HistoryPage = observer(() => {
                           : "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
                       }`}
                     >
-                      {item.type === "order" ? "Sipariş" : "Gider"}
+                      {item.type === "order"
+                        ? t("reports.type_order")
+                        : t("reports.type_expense")}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-900 dark:text-white">
