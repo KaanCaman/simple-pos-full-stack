@@ -1,13 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
+import { useStore } from "../../stores/rootStore";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   History,
   Settings,
   UtensilsCrossed,
+  FileText,
   X,
 } from "lucide-react";
+import { AppConstants } from "../../constants/app";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -16,14 +20,43 @@ interface SidebarProps {
 
 export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
   const { t } = useTranslation();
+  const store = useStore();
   const location = useLocation();
+  // State to force re-render every minute for time calculation
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 60000); // Check every minute
+    return () => clearInterval(timer);
+  }, []);
 
   const menuItems = [
     { icon: LayoutDashboard, label: "dashboard.menu.dashboard", path: "/" },
     { icon: UtensilsCrossed, label: "dashboard.menu.pos", path: "/pos" },
-    { icon: History, label: "dashboard.menu.history", path: "/history" },
+    {
+      icon: FileText,
+      label: "dashboard.menu.daily_report",
+      path: "/reports",
+    },
+    {
+      icon: History,
+      label: "dashboard.menu.history",
+      path: "/reports/history",
+    },
     { icon: Settings, label: "dashboard.menu.settings", path: "/settings" },
   ];
+
+  // Calculate if day has been open for more than 13 hours
+  const isDayTooLong = () => {
+    if (!store.authStore.isDayOpen || !store.authStore.dayStartTime)
+      return false;
+    const start = new Date(store.authStore.dayStartTime);
+    const now = new Date();
+    const diffInHours = (now.getTime() - start.getTime()) / (1000 * 60 * 60);
+    return diffInHours > 13;
+  };
 
   return (
     <>
@@ -47,9 +80,27 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 text-white shadow-lg shadow-primary-500/20">
               <UtensilsCrossed className="h-6 w-6" />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              Tostçu POS
-            </span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                {AppConstants.APP_NAME}
+              </span>
+              {store.authStore.isDayOpen && store.authStore.dayStartTime && (
+                <div className="flex flex-col mt-0.5">
+                  <span className="text-xs text-green-600 font-medium">
+                    {t("dashboard.sidebar.day_started")}:{" "}
+                    {new Date(store.authStore.dayStartTime).toLocaleTimeString(
+                      "tr-TR",
+                      { hour: "2-digit", minute: "2-digit" }
+                    )}
+                  </span>
+                  {isDayTooLong() && (
+                    <span className="text-[10px] text-red-500 font-bold mt-1 animate-pulse">
+                      {t("dashboard.sidebar.long_day_warning")}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}

@@ -27,7 +27,7 @@ export class TableStore {
     try {
       const response = await tableService.getTables();
       runInAction(() => {
-        this.tables = response.data.data;
+        this.tables = response.data.data || [];
       });
     } catch (error: any) {
       runInAction(() => {

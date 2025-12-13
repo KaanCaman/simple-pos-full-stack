@@ -4,6 +4,7 @@ import (
 	"errors"
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -48,6 +49,18 @@ func (r *workPeriodRepository) FindActivePeriod() (*models.WorkPeriod, error) {
 //	Bir work period günceller
 func (r *workPeriodRepository) Update(period *models.WorkPeriod) error {
 	return r.db.Save(period).Error
+}
+
+func (r *workPeriodRepository) GetPeriodsByDate(date time.Time) ([]models.WorkPeriod, error) {
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	var periods []models.WorkPeriod
+	// Find periods that STARTED on this day
+	if err := r.db.Where("start_time >= ? AND start_time < ?", startOfDay, endOfDay).Find(&periods).Error; err != nil {
+		return nil, err
+	}
+	return periods, nil
 }
 
 // FindByID finds a work period by ID

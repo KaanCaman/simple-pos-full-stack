@@ -57,8 +57,9 @@ func (h *TransactionHandler) ListExpenses(c *fiber.Ctx) error {
 			end = parsed
 		}
 	}
+	scope := c.Query("scope")
 
-	expenses, err := h.service.ListExpenses(start, end)
+	expenses, err := h.service.ListExpenses(start, end, scope)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not fetch expenses")
 	}

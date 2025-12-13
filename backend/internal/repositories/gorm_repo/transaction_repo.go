@@ -52,6 +52,33 @@ func (r *transactionRepository) FindAll(startDate, endDate time.Time, txType str
 	return transactions, err
 }
 
+func (r *transactionRepository) FindAllByWorkPeriodID(periodID uint, txType string) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	query := r.db.Model(&models.Transaction{}).Where("work_period_id = ?", periodID)
+
+	if txType != "" {
+		query = query.Where("type = ?", txType)
+	}
+
+	err := query.Order("created_at desc").Find(&transactions).Error
+	return transactions, err
+}
+
+func (r *transactionRepository) FindAllByWorkPeriodIDs(periodIDs []uint, txType string) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	if len(periodIDs) == 0 {
+		return []models.Transaction{}, nil
+	}
+	query := r.db.Model(&models.Transaction{}).Where("work_period_id IN ?", periodIDs)
+
+	if txType != "" {
+		query = query.Where("type = ?", txType)
+	}
+
+	err := query.Order("created_at desc").Find(&transactions).Error
+	return transactions, err
+}
+
 func (r *transactionRepository) Update(transaction *models.Transaction) error {
 	return r.db.Save(transaction).Error
 }
@@ -65,6 +92,14 @@ func (r *transactionRepository) FindByID(id uint) (*models.Transaction, error) {
 	var transaction models.Transaction
 	err := r.db.First(&transaction, id).Error
 	if err != nil {
+		return nil, err
+	}
+	return &transaction, nil
+}
+
+func (r *transactionRepository) FindByOrderID(orderID uint) (*models.Transaction, error) {
+	var transaction models.Transaction
+	if err := r.db.Where("order_id = ?", orderID).First(&transaction).Error; err != nil {
 		return nil, err
 	}
 	return &transaction, nil

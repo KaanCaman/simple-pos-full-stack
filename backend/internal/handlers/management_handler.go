@@ -43,13 +43,16 @@ func (h *ManagementHandler) GetSystemStatus(c *fiber.Ctx) error {
 
 	isDayOpen := period != nil
 	var workPeriodID uint
+	var startTime interface{}
 	if isDayOpen {
 		workPeriodID = period.ID
+		startTime = period.StartTime
 	}
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "System status retrieved", fiber.Map{
 		"is_day_open":    isDayOpen,
 		"work_period_id": workPeriodID,
+		"start_time":     startTime,
 	})
 }
 

@@ -1,7 +1,8 @@
+import type { User } from "./auth";
 import type { BaseEntity } from "./api";
 
 export type TableStatus = "available" | "occupied"; // Diğer durumlar eklenebilir
-export type OrderStatus = "OPEN" | "CLOSED" | "CANCELLED";
+export type OrderStatus = "OPEN" | "CLOSED" | "CANCELLED" | "COMPLETED";
 export type PaymentMethod = "CASH" | "CREDIT_CARD" | "";
 
 export interface Table extends BaseEntity {
@@ -31,6 +32,7 @@ export interface Order extends BaseEntity {
   payment_method: PaymentMethod;
   completed_at: string | null;
   items?: OrderItem[]; // Response often includes items
+  waiter?: User;
 }
 
 export interface CreateOrderRequest {

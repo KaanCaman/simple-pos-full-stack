@@ -1,7 +1,13 @@
 import { BaseService } from "../../../services/BaseService";
 import type { ApiResponse } from "../../../types/api";
 import { AppEndPoints } from "../../../constants/app";
-import type { DailyReport, DayStatus } from "../../../types/dashboard";
+import type { DailyReport } from "../../../types/dashboard";
+
+export interface DayStatus {
+  is_day_open: boolean;
+  work_period_id: number;
+  start_time?: string;
+}
 
 class ManagementService extends BaseService {
   constructor() {

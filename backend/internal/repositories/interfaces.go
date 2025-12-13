@@ -43,8 +43,11 @@ type UserRepository interface {
 // Sipariş veri erişimi için arayüzü tanımlar
 type OrderRepository interface {
 	Create(order *models.Order) error
+	FindAll(startDate, endDate time.Time) ([]models.Order, error)
 	FindByID(id uint) (*models.Order, error)
 	FindByTableID(tableID uint, status string) ([]models.Order, error)
+	FindByWorkPeriod(periodID uint) ([]models.Order, error)
+	FindByWorkPeriodIDs(periodIDs []uint) ([]models.Order, error)
 	Update(order *models.Order) error
 	Delete(id uint) error
 
@@ -68,9 +71,12 @@ type TransactionRepository interface {
 	CreateWithTx(tx *gorm.DB, transaction *models.Transaction) error
 	FindDailyTotal(date time.Time, txType string) (int64, error)
 	FindAll(startDate, endDate time.Time, txType string) ([]models.Transaction, error)
+	FindAllByWorkPeriodID(periodID uint, txType string) ([]models.Transaction, error)
+	FindAllByWorkPeriodIDs(periodIDs []uint, txType string) ([]models.Transaction, error)
 	Update(transaction *models.Transaction) error
 	Delete(id uint) error
 	FindByID(id uint) (*models.Transaction, error)
+	FindByOrderID(orderID uint) (*models.Transaction, error)
 }
 
 // WorkPeriodRepository defines the interface for work period data access
@@ -79,6 +85,7 @@ type WorkPeriodRepository interface {
 	Create(period *models.WorkPeriod) error
 	FindActivePeriod() (*models.WorkPeriod, error)
 	Update(period *models.WorkPeriod) error
+	GetPeriodsByDate(date time.Time) ([]models.WorkPeriod, error)
 	FindByID(id uint) (*models.WorkPeriod, error)
 }
 

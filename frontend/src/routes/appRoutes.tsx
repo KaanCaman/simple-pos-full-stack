@@ -10,6 +10,8 @@ import { DashboardPage } from "../features/dashboard/components/DashboardPage";
 import { OrderPage } from "../features/pos/components/OrderPage";
 import { POSPage } from "../features/pos/components/POSPage";
 import { HistoryPage } from "../features/reports/components/HistoryPage";
+import { DailyReportPage } from "../features/reports/components/DailyReportPage";
+import { ReportHistoryPage } from "../features/reports/components/ReportHistoryPage";
 import { SettingsPage } from "../features/settings/components/SettingsPage";
 import { StartDayPage } from "../features/dashboard/components/StartDayPage";
 import { DayGuard } from "../components/DayGuard";
@@ -63,6 +65,18 @@ export const appRoutes = createBrowserRouter([
               {
                 path: "history",
                 element: <HistoryPage />,
+              },
+              {
+                path: "reports",
+                element: <DailyReportPage />,
+              },
+              {
+                path: "reports/history",
+                element: <ReportHistoryPage />,
+              },
+              {
+                path: "reports/:date",
+                element: <DailyReportPage />,
               },
               {
                 path: "settings",

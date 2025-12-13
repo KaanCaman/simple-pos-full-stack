@@ -60,6 +60,40 @@ func (h *OrderHandler) GetOrder(c *fiber.Ctx) error {
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Order details", order)
 }
 
+// GetOrders handles GET /orders?start_date=...&end_date=...&scope=active
+func (h *OrderHandler) GetOrders(c *fiber.Ctx) error {
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+	scope := c.Query("scope")
+
+	now := time.Now()
+	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	endDate := startDate.Add(24 * time.Hour)
+
+	if startDateStr != "" {
+		if parsed, err := time.Parse("2006-01-02", startDateStr); err == nil {
+			startDate = parsed
+			if endDateStr == "" {
+				endDate = startDate.Add(24 * time.Hour)
+			}
+		}
+	}
+
+	if endDateStr != "" {
+		if parsed, err := time.Parse("2006-01-02", endDateStr); err == nil {
+			// Ensure end date covers the full day if just date is provided
+			endDate = parsed.Add(24 * time.Hour)
+		}
+	}
+
+	orders, err := h.service.GetOrders(startDate, endDate, scope)
+	if err != nil {
+		return utils.InternalError(c, utils.CodeInternalError, err.Error())
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Orders retrieved", orders)
+}
+
 // GetOrdersByTable handles GET /orders/table/:id
 // Masadaki siparişleri getirir
 func (h *OrderHandler) GetOrdersByTable(c *fiber.Ctx) error {

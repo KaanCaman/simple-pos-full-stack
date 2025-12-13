@@ -14,8 +14,13 @@
     "menu": {
       "dashboard": "Panel",
       "pos": "Sipariş (POS)",
+      "daily_report": "Gün Sonu / Rapor",
       "history": "Geçmiş",
       "settings": "Ayarlar"
+    },
+    "sidebar": {
+      "day_started": "Başlangıç",
+      "long_day_warning": "⚠️ Günü kapatmayı unutma!"
     },
     "floor": {
       "ground": "Zemin Kat",

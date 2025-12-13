@@ -4,6 +4,8 @@ import (
 	"errors"
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -53,9 +55,44 @@ func (s *TransactionService) AddExpense(amount int64, description, category, pay
 	return transaction, nil
 }
 
-// ListExpenses returns expenses within a date range
-func (s *TransactionService) ListExpenses(startDate, endDate time.Time) ([]models.Transaction, error) {
-	return s.repo.FindAll(startDate, endDate, "EXPENSE")
+// ListExpenses returns expenses within a date range or active scope
+func (s *TransactionService) ListExpenses(startDate, endDate time.Time, scope string) ([]models.Transaction, error) {
+	if scope == "active" {
+		activePeriod, err := s.workPeriodRepo.FindActivePeriod()
+		if err != nil {
+			return nil, err
+		}
+		if activePeriod != nil {
+			return s.repo.FindAllByWorkPeriodID(activePeriod.ID, "EXPENSE")
+		}
+		return []models.Transaction{}, nil
+	}
+
+	// Specific Work Period Scope
+	if strings.HasPrefix(scope, "period_") {
+		periodIDStr := strings.TrimPrefix(scope, "period_")
+		periodID, err := strconv.ParseUint(periodIDStr, 10, 32)
+		if err == nil {
+			return s.repo.FindAllByWorkPeriodID(uint(periodID), "EXPENSE")
+		}
+	}
+
+	// Strict WorkPeriod Logic for History (Date-based)
+	periods, err := s.workPeriodRepo.GetPeriodsByDate(startDate)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(periods) == 0 {
+		return []models.Transaction{}, nil
+	}
+
+	var ids []uint
+	for _, p := range periods {
+		ids = append(ids, p.ID)
+	}
+
+	return s.repo.FindAllByWorkPeriodIDs(ids, "EXPENSE")
 }
 
 // UpdateExpense updates an existing expense

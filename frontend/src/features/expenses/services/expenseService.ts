@@ -24,11 +24,11 @@ class ExpenseService {
     );
   }
 
-  async getExpenses(startDate?: string, endDate?: string) {
+  async getExpenses(startDate?: string, endDate?: string, scope?: string) {
     return apiClient.get<ApiResponse<Transaction[]>>(
       AppEndPoints.API_V1.TRANSACTIONS.EXPENSE,
       {
-        params: { start_date: startDate, end_date: endDate },
+        params: { start_date: startDate, end_date: endDate, scope },
       }
     );
   }

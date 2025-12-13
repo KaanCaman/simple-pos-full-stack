@@ -31,7 +31,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	productService := services.NewProductService(productRepo)
 	transactionService := services.NewTransactionService(transactionRepo, workPeriodRepo)
 	orderService := services.NewOrderService(orderRepo, transactionRepo, workPeriodRepo, productRepo, tableRepo)
-	analyticsService := services.NewAnalyticsService(db, transactionRepo)
+	analyticsService := services.NewAnalyticsService(db, transactionRepo, workPeriodRepo)
 	userService := services.NewUserService(userRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
 	tableService := services.NewTableService(tableRepo)
@@ -77,6 +77,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	protected.Delete("/orders/:id/items/:itemId", orderHandler.RemoveItem)
 	protected.Delete("/orders/:id", orderHandler.Cancel)
 	protected.Get("/orders/:id", orderHandler.GetOrder)
+	protected.Get("/orders", orderHandler.GetOrders)
 	protected.Get("/orders/table/:id", orderHandler.GetOrdersByTable)
 	// Admin Routes
 	admin := protected.Group("/", middleware.RequireRole("admin"))
@@ -116,4 +117,5 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 
 	// Analytics Routes (Admin)
 	admin.Get("/analytics/daily", analyticsHandler.GetDailyReport)
+	admin.Get("/analytics/history", analyticsHandler.GetReportHistory)
 }

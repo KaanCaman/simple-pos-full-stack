@@ -70,6 +70,14 @@ class OrderService extends BaseService {
     );
   }
 
+  // Get orders with date filter
+  // Get orders with date filter
+  public async getOrders(startDate?: string, endDate?: string, scope?: string) {
+    return this.get<ApiResponse<Order[]>>(AppEndPoints.API_V1.ORDERS, {
+      params: { start_date: startDate, end_date: endDate, scope },
+    });
+  }
+
   // Ideally we might want a getOrder details endpoint, but for now we might rely on initial creation or table management fetching orders.
   // The backend doesn't explicitly list GET /orders/:id in the snippet provided earlier, but we can assume how to get order details if needed.
   // Actually, TableService.listTables likely returns tables with current order info (maybe?).
