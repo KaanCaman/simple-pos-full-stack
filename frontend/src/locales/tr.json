@@ -63,9 +63,8 @@
     },
     "tables": {
       "title": "Masa Yönetimi",
-      "desc": "Masa düzenini yönetin",
       "add_table": "Masa Ekle",
-      "edit_table": "Masayı Düzenle",
+      "edit_table": "Masa Düzenle",
       "table_name": "Masa Adı",
       "occupied": "Dolu",
       "empty": "Boş",
@@ -75,7 +74,42 @@
       "delete_success": "Masa silindi",
       "create_success": "Masa oluşturuldu",
       "update_success": "Masa güncellendi",
-      "empty_state": "Henüz hiç masa eklenmemiş."
+      "enter_table_name": "Masa adı giriniz (Örn: Bahçe-12)"
+    },
+    "categories": {
+      "title": "Kategori Yönetimi",
+      "add_category": "Kategori Ekle",
+      "edit_category": "Kategori Düzenle",
+      "category_name": "Kategori Adı",
+      "color_select": "Renk Seçimi",
+      "products_count": "{{count}} Ürün",
+      "confirm_delete": "Bu kategoriyi silmek istediğinize emin misiniz?",
+      "confirm_create": "Yeni kategori oluşturmak istediğinize emin misiniz?",
+      "confirm_update": "Kategori bilgilerini güncellemek istediğinize emin misiniz?",
+      "delete_success": "Kategori silindi",
+      "create_success": "Kategori oluşturuldu",
+      "update_success": "Kategori güncellendi",
+      "enter_category_name": "Kategori adı giriniz (Örn: Salatalar)"
+    },
+    "products": {
+      "title": "Ürün Yönetimi",
+      "add_product": "Ürün Ekle",
+      "edit_product": "Ürün Düzenle",
+      "product_name": "Ürün Adı",
+      "price": "Fiyat",
+      "category": "Kategori",
+      "description": "Açıklama",
+      "enter_product_name": "Ürün adı giriniz",
+      "enter_price": "Fiyat giriniz",
+      "enter_description": "Ürün açıklaması (isteğe bağlı)",
+      "select_category": "Kategori Seçin",
+      "currency": "₺",
+      "confirm_delete": "Bu ürünü silmek istediğinize emin misiniz?",
+      "confirm_create": "Yeni ürün oluşturmak istediğinize emin misiniz?",
+      "confirm_update": "Ürün bilgilerini güncellemek istediğinize emin misiniz?",
+      "delete_success": "Ürün silindi",
+      "create_success": "Ürün oluşturuldu",
+      "update_success": "Ürün güncellendi"
     }
   },
   "errors": {

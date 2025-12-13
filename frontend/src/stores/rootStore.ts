@@ -1,6 +1,8 @@
 import { createContext, useContext } from "react";
 import { AuthStore } from "../features/auth/stores/authStore";
 import { TableStore } from "../features/dashboard/stores/tableStore";
+import { CategoryStore } from "../features/dashboard/stores/categoryStore";
+import { ProductStore } from "../features/dashboard/stores/productStore";
 import { UiStore } from "./uiStore";
 
 // Root store for global state management.
@@ -8,11 +10,15 @@ import { UiStore } from "./uiStore";
 export class RootStore {
   authStore: AuthStore;
   tableStore: TableStore;
+  categoryStore: CategoryStore;
+  productStore: ProductStore;
   uiStore: UiStore;
 
   constructor() {
     this.authStore = new AuthStore(this);
     this.tableStore = new TableStore(this);
+    this.categoryStore = new CategoryStore(this);
+    this.productStore = new ProductStore(this);
     this.uiStore = new UiStore(this);
   }
 }

@@ -6,6 +6,7 @@ export interface Category extends BaseEntity {
   color: string;
   sort_order: number;
   is_active: boolean;
+  products?: Product[];
 }
 
 export interface CreateCategoryRequest {
@@ -37,5 +38,5 @@ export interface UpdateProductRequest {
   category_id?: number;
   name?: string;
   price?: number;
-  // Diğer alanlar opsiyonel olabilir
+  description?: string;
 }
