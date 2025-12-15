@@ -39,7 +39,10 @@ func New(cfg *config.Config) *fiber.App {
 	app.Use(middleware.RecoveryMiddleware())      // Recover from panics with Zap
 	app.Use(cors.New())
 
-	// 5. Register Routes (handles all dependency wiring)
+	// 5. Static Files
+	app.Static("/uploads", "./uploads")
+
+	// 6. Register Routes (handles all dependency wiring)
 	routes.RegisterRoutes(app, database.DB, cfg)
 
 	log.Println("Server initialized in " + cfg.Environment + " mode")

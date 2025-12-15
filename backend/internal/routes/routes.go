@@ -35,6 +35,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	userService := services.NewUserService(userRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
 	tableService := services.NewTableService(tableRepo)
+	uploadService := services.NewUploadService()
 
 	// 6. Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService, workPeriodRepo)
@@ -46,6 +47,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	userHandler := handlers.NewUserHandler(userService)
 	managementHandler := handlers.NewManagementHandler(managementService)
 	tableHandler := handlers.NewTableHandler(tableService)
+	uploadHandler := handlers.NewUploadHandler(uploadService)
 
 	// 7. Route Groups
 	api := app.Group("/api/v1") // /api/v1
@@ -106,6 +108,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	admin.Post("/products", productHandler.Create)
 	admin.Put("/products/:id", productHandler.Update)
 	admin.Delete("/products/:id", productHandler.Delete)
+
+	// Upload Management (Admin)
+	admin.Post("/uploads/product-image", uploadHandler.UploadProductImage)
 
 	// Table Management (Admin)
 	admin.Post("/tables", tableHandler.CreateTable)
