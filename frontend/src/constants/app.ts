@@ -3,15 +3,10 @@
 
 export class AppConstants {
   static readonly APP_VERSION = __APP_VERSION__;
-  static readonly APP_NAME = import.meta.env.VITE_APP_NAME || "APP NAME";
-  static readonly API_URL =
-    import.meta.env.VITE_API_URL || "http://localhost:3000";
-  static readonly IDLE_TIMEOUT =
-    Number(import.meta.env.VITE_IDLE_TIMEOUT) || 15 * 60 * 1000; // 15 minutes
-  static readonly TAX_RATE =
-    import.meta.env.VITE_TAX_RATE !== undefined
-      ? Number(import.meta.env.VITE_TAX_RATE)
-      : 0;
+  static readonly APP_NAME = __APP_NAME__;
+  static readonly API_URL = __API_URL__;
+  static readonly IDLE_TIMEOUT = __IDLE_TIMEOUT__;
+  static readonly TAX_RATE = __TAX_RATE__;
 }
 
 export class AppEndPoints {
