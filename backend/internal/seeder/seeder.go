@@ -46,30 +46,4 @@ func Seed(db *gorm.DB, cfg *config.Config) {
 
 	log.Printf("Admin user '%s' created successfully.", admin.Name)
 
-	// 4. Seed Categories and Products (Optional: Only if admin was created effectively implies fresh DB)
-	// We can keep the original logic which also seeded products
-	seedProducts(db)
-}
-
-func seedProducts(db *gorm.DB) {
-	// Check if categories exist
-	var count int64
-	db.Model(&models.Category{}).Count(&count)
-	if count > 0 {
-		return
-	}
-
-	log.Println("Seeding default menu items...")
-
-	toastCat := models.Category{Name: "Tostlar", SortOrder: 1, IsActive: true}
-	drinkCat := models.Category{Name: "İçecekler", SortOrder: 2, IsActive: true}
-	db.Create(&toastCat)
-	db.Create(&drinkCat)
-
-	db.Create(&models.Product{Name: "Kaşarlı Tost", Price: 10000, CategoryID: toastCat.ID, IsAvailable: true}) // 100 TL
-	db.Create(&models.Product{Name: "Sucuklu Tost", Price: 12000, CategoryID: toastCat.ID, IsAvailable: true}) // 120 TL
-	db.Create(&models.Product{Name: "Ayran", Price: 2000, CategoryID: drinkCat.ID, IsAvailable: true})         // 20 TL
-	db.Create(&models.Product{Name: "Çay", Price: 1000, CategoryID: drinkCat.ID, IsAvailable: true})           // 10 TL
-
-	log.Println("Default menu seeded!")
 }
