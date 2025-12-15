@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { useStore } from "../stores/rootStore";
 import { X, AlertTriangle, AlertCircle, Info } from "lucide-react";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
 
 export const GlobalConfirmationDialog = observer(() => {
@@ -27,7 +27,7 @@ export const GlobalConfirmationDialog = observer(() => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[150]" onClose={handleCancel}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -37,11 +37,11 @@ export const GlobalConfirmationDialog = observer(() => {
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -50,7 +50,7 @@ export const GlobalConfirmationDialog = observer(() => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-[#1A1D1F] p-6 text-left align-middle shadow-xl transition-all border border-gray-100 dark:border-gray-800">
+              <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-[#1A1D1F] p-6 text-left align-middle shadow-xl transition-all border border-gray-100 dark:border-gray-800">
                 <div className="flex items-start gap-4">
                   <div
                     className={`
@@ -132,8 +132,8 @@ export const GlobalConfirmationDialog = observer(() => {
                     {options.confirmText || "Onayla"}
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

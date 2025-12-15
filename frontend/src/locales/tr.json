@@ -13,7 +13,8 @@
     "search_placeholder": "Menü veya masa ara...",
     "coming_soon": "Yakında",
     "go_home": "Ana Sayfaya Dön",
-    "no_data": "Veri bulunamadı"
+    "no_data": "Veri bulunamadı",
+    "addExpense": "Gider Ekle"
   },
   "dashboard": {
     "menu": {

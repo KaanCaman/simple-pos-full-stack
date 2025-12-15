@@ -19,7 +19,8 @@ export const ProductManagement = observer(() => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    price: "",
+    lira: "",
+    kurus: "",
     categoryId: "",
     description: "",
   });
@@ -44,7 +45,8 @@ export const ProductManagement = observer(() => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
-      price: (product.price / 100).toString(), // Convert cents to lira
+      lira: Math.floor(product.price / 100).toString(),
+      kurus: (product.price % 100).toString().padStart(2, "0"),
       categoryId: product.category_id.toString(),
       description: product.description || "",
     });
@@ -55,7 +57,8 @@ export const ProductManagement = observer(() => {
     setEditingProduct(null);
     setFormData({
       name: "",
-      price: "",
+      lira: "",
+      kurus: "",
       categoryId: "",
       description: "",
     });
@@ -63,12 +66,13 @@ export const ProductManagement = observer(() => {
   };
 
   const handleSubmit = () => {
-    if (!formData.name.trim() || !formData.price || !formData.categoryId) {
+    if (!formData.name.trim() || !formData.categoryId) {
       toast.error(t("errors.generic")); // Improve validation feedback later
       return;
     }
 
-    const priceInCents = Math.round(parseFloat(formData.price) * 100);
+    const priceInCents =
+      parseInt(formData.lira || "0") * 100 + parseInt(formData.kurus || "0");
     const categoryId = parseInt(formData.categoryId);
 
     const message = editingProduct
@@ -286,15 +290,39 @@ export const ProductManagement = observer(() => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   {t("settings.products.price")}
                 </label>
-                <input
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base text-gray-900 dark:text-white"
-                  placeholder={t("settings.products.enter_price")}
-                />
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-400">
+                      ₺
+                    </span>
+                    <input
+                      type="number"
+                      value={formData.lira}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lira: e.target.value })
+                      }
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-lg font-bold text-gray-900 dark:text-white text-right placeholder-gray-400 dark:placeholder-gray-500"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <span className="text-2xl font-bold text-gray-300">,</span>
+                  <div className="relative w-24">
+                    <input
+                      type="number"
+                      value={formData.kurus}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 2) {
+                          setFormData({ ...formData, kurus: e.target.value });
+                        }
+                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-lg font-bold text-gray-900 dark:text-white text-center placeholder-gray-400 dark:placeholder-gray-500"
+                      placeholder="00"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>

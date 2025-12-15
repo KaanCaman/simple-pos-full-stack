@@ -55,7 +55,7 @@ export const Header = observer(({ onMenuClick, onAddExpense }: HeaderProps) => {
           onClick={onAddExpense}
           className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 rounded-lg transition-colors text-sm font-bold"
         >
-          <span>Gider Ekle</span>
+          <span>{t("common.addExpense")}</span>
         </button>
 
         {/* Theme Toggle */}
