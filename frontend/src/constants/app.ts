@@ -2,7 +2,7 @@
 // Uygulama sabitleri.
 
 export class AppConstants {
-  static readonly APP_VERSION = "0.0.1";
+  static readonly APP_VERSION = __APP_VERSION__;
   static readonly APP_NAME = import.meta.env.VITE_APP_NAME || "APP NAME";
   static readonly API_URL =
     import.meta.env.VITE_API_URL || "http://localhost:3000";

@@ -6,6 +6,7 @@ import (
 	"simple-pos/internal/middleware"
 	"simple-pos/internal/platform/database"
 	"simple-pos/internal/routes"
+	"simple-pos/internal/seeder"
 	"simple-pos/pkg/config"
 	"simple-pos/pkg/logger"
 
@@ -24,6 +25,9 @@ func New(cfg *config.Config) *fiber.App {
 
 	// 3. Migrate Database
 	database.Migrate()
+
+	// 4. Seed Database
+	seeder.Seed(database.DB, cfg)
 
 	// 4. Setup Fiber
 	app := fiber.New(fiber.Config{
