@@ -2,7 +2,6 @@ import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import {
-  User,
   Shield,
   LayoutGrid,
   UtensilsCrossed,
@@ -10,12 +9,14 @@ import {
   ChevronRight,
   ChevronLeft,
   Receipt,
+  Sliders,
 } from "lucide-react";
 import { TableManagement } from "./sections/TableManagement";
 import { CategoryManagement } from "./sections/CategoryManagement";
 import { ProductManagement } from "./sections/ProductManagement";
 import { ExpenseManagement } from "./sections/ExpenseManagement";
 import { UserManagement } from "./sections/UserManagement";
+import { GeneralSettings } from "./sections/GeneralSettings";
 
 type SectionId =
   | "profile"
@@ -26,7 +27,8 @@ type SectionId =
   | "tables"
   | "categories"
   | "products"
-  | "expenses" // Added
+  | "expenses"
+  | "general"
   | null;
 
 export const SettingsPage = observer(() => {
@@ -91,6 +93,13 @@ export const SettingsPage = observer(() => {
             "Garson hesapları ve yetkiler"
           ),
           component: <UserManagement />,
+        },
+        {
+          id: "general",
+          icon: Sliders,
+          label: t("settings.sections.general_settings"),
+          desc: t("settings.sections.general_settings_desc"),
+          component: <GeneralSettings />,
         },
       ],
     },
