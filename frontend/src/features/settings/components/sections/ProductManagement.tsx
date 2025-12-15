@@ -146,7 +146,7 @@ export const ProductManagement = observer(() => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t("common.search")}
-            className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#1A1D1F] border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#1A1D1F] border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-gray-900 dark:text-white"
           />
         </div>
         <button
@@ -277,7 +277,7 @@ export const ProductManagement = observer(() => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base text-gray-900 dark:text-white"
                   placeholder={t("settings.products.enter_product_name")}
                 />
               </div>
@@ -292,7 +292,7 @@ export const ProductManagement = observer(() => {
                   onChange={(e) =>
                     setFormData({ ...formData, price: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base text-gray-900 dark:text-white"
                   placeholder={t("settings.products.enter_price")}
                 />
               </div>

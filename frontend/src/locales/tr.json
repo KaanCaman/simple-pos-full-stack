@@ -11,7 +11,8 @@
     "search": "Ara...",
     "search_placeholder": "Menü veya masa ara...",
     "coming_soon": "Yakında",
-    "go_home": "Ana Sayfaya Dön"
+    "go_home": "Ana Sayfaya Dön",
+    "no_data": "Veri bulunamadı"
   },
   "dashboard": {
     "menu": {
@@ -79,7 +80,8 @@
     "table_order_title": "Masa {{table}} Siparişi",
     "order_info": "Sipariş #{{id}} • Garson: {{waiter}}",
     "vat_rate": "KDV (%{{rate}})",
-    "table_title": "Masa {{id}}"
+    "table_title": "Masa {{id}}",
+    "order_cancelled": "Sipariş İptal Edildi"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -270,7 +272,10 @@
   "day": {
     "system_closed": "Sistem Kapalı",
     "contact_manager": "Lütfen yöneticinizle iletişime geçin. Gün henüz başlatılmadı.",
-    "start_day_button": "Günü Başlat"
+    "start_day_button": "Günü Başlat",
+    "start_day_message": "Günü başlatmak için aşağıdaki butona tıklayın.",
+    "why_start_day_title": "Neden Günü Başlatmalıyım?",
+    "why_start_day_desc": "Sipariş alabilmek ve gün sonu raporlarının doğru oluşturulabilmesi için çalışma dönemini başlatmanız gerekmektedir."
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",

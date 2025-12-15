@@ -83,18 +83,6 @@ export const SettingsPage = observer(() => {
       title: t("settings.account_system", "Hesap & Sistem"),
       items: [
         {
-          id: "profile",
-          icon: User,
-          label: t("settings.sections.profile", "Profil Bilgileri"),
-          desc: t(
-            "settings.sections.profile_desc",
-            "Ad, soyad ve iletişim bilgileri"
-          ),
-          component: (
-            <div className="p-4">{t("common.coming_soon", "Yakında")}</div>
-          ),
-        },
-        {
           id: "staff",
           icon: Shield,
           label: t("settings.sections.user_management", "Personel Yönetimi"),
