@@ -52,7 +52,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 
 	// Health Check
 	app.Get("/health", func(c *fiber.Ctx) error {
-		return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Tostcu POS Backend is running!", nil)
+		return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Simple POS Backend is running!", nil)
 	})
 
 	// Public Routes
@@ -68,6 +68,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 
 	// Tables (Read-Only Public/Protected) - Waiters need to see tables.
 	protected.Get("/tables", tableHandler.ListTables)
+
+	// System Status (Shared)
+	protected.Get("/management/status", managementHandler.GetSystemStatus)
 
 	// Orders
 	protected.Post("/orders", orderHandler.Create)
@@ -113,7 +116,6 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	management := admin.Group("/management", middleware.RateLimiter(5, time.Minute))
 	management.Post("/start-day", managementHandler.StartDay)
 	management.Post("/end-day", managementHandler.EndDay)
-	management.Get("/status", managementHandler.GetSystemStatus)
 
 	// Analytics Routes (Admin)
 	admin.Get("/analytics/daily", analyticsHandler.GetDailyReport)

@@ -18,6 +18,27 @@ export const StartDayPage = observer(() => {
     }
   };
 
+  // If user is not admin, show restricted view
+  if (authStore.user?.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center space-y-6">
+          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto">
+            <Sun className="w-10 h-10 text-gray-400" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              {t("day.system_closed")}
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">
+              {t("day.contact_manager")}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center space-y-6">

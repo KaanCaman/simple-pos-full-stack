@@ -10,7 +10,8 @@
     "add": "Ekle",
     "search": "Ara...",
     "search_placeholder": "Menü veya masa ara...",
-    "coming_soon": "Yakında"
+    "coming_soon": "Yakında",
+    "go_home": "Ana Sayfaya Dön"
   },
   "dashboard": {
     "menu": {
@@ -266,10 +267,18 @@
     "payment_credit": "Kredi Kartı",
     "loading_error": "Veriler yüklenirken bir hata oluştu"
   },
+  "day": {
+    "system_closed": "Sistem Kapalı",
+    "contact_manager": "Lütfen yöneticinizle iletişime geçin. Gün henüz başlatılmadı.",
+    "start_day_button": "Günü Başlat"
+  },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
     "network": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
     "title": "Beklenmeyen bir hata oluştu",
-    "contactSupport": "Lütfen sayfayı yenileyin veya destek ekibiyle iletişime geçin."
+    "contactSupport": "Lütfen sayfayı yenileyin veya destek ekibiyle iletişime geçin.",
+    "unauthorized_title": "Yetkisiz Erişim",
+    "unauthorized_desc": "Bu sayfayı görüntülemek için gerekli yetkiye sahip değilsiniz.",
+    "redirecting_in": "{{seconds}} saniye içinde yönlendirileceksiniz..."
   }
 }

@@ -16,6 +16,7 @@ import { StartDayPage } from "../features/dashboard/components/StartDayPage";
 import { DayGuard } from "../components/DayGuard";
 import { RoleGuard } from "../features/auth/components/RoleGuard";
 import { RoleBasedHome } from "../components/RoleBasedHome";
+import { SystemClosedPage } from "../features/dashboard/components/SystemClosedPage";
 
 // Root layout component that includes global providers/components.
 // Küresel sağlayıcıları/bileşenleri içeren kök düzen bileşeni.
@@ -57,9 +58,7 @@ export const appRoutes = createBrowserRouter([
             children: [
               // Admin Only Routes
               {
-                element: (
-                  <RoleGuard allowedRoles={["admin"]} redirectPath="/pos" />
-                ),
+                element: <RoleGuard allowedRoles={["admin"]} />,
                 children: [
                   {
                     path: "history",
@@ -100,7 +99,15 @@ export const appRoutes = createBrowserRouter([
           },
           {
             path: "start-day",
-            element: <StartDayPage />,
+            element: (
+              <RoleGuard allowedRoles={["admin"]}>
+                <StartDayPage />
+              </RoleGuard>
+            ),
+          },
+          {
+            path: "system-closed",
+            element: <SystemClosedPage />,
           },
         ],
       },
