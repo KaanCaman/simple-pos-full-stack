@@ -123,7 +123,7 @@ export const ExpenseModal = observer(
                     type="number"
                     value={lira}
                     onChange={(e) => setLira(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-right"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-right placeholder-gray-400 dark:placeholder-gray-500"
                     placeholder="0"
                     autoFocus
                     min="0"
@@ -141,7 +141,7 @@ export const ExpenseModal = observer(
                         setKurus(e.target.value);
                       }
                     }}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-center"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-center placeholder-gray-400 dark:placeholder-gray-500"
                     placeholder="00"
                     min="0"
                     max="99"
@@ -161,7 +161,7 @@ export const ExpenseModal = observer(
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Örn: Bulaşık Deterjanı"
                   disabled={expenseStore.isLoading}
                 />
@@ -173,7 +173,7 @@ export const ExpenseModal = observer(
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white"
                   disabled={expenseStore.isLoading}
                 >
                   <option value="market">Market</option>
