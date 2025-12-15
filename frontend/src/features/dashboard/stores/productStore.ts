@@ -24,6 +24,7 @@ export class ProductStore {
     this.error = null;
     try {
       const response = await productService.getProducts();
+      console.log("RM ,:", response.data.data);
       runInAction(() => {
         this.products = response.data.data;
       });

@@ -3,6 +3,7 @@ import { useStore } from "../../../stores/rootStore";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { AppConstants } from "../../../constants/app";
 
 interface MenuGridProps {
   onBack?: () => void;
@@ -112,7 +113,7 @@ export const MenuGrid = observer(({ onBack }: MenuGridProps) => {
                 {/* Product Image or Placeholder */}
                 {product.image_url ? (
                   <img
-                    src={product.image_url}
+                    src={`${AppConstants.API_URL}${product.image_url}`}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

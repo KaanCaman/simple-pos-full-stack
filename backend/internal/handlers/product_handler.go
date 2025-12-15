@@ -23,12 +23,16 @@ type CreateProductRequest struct {
 	Price       int64  `json:"price" validate:"required,min=0"`
 	CategoryID  uint   `json:"category_id" validate:"required"`
 	Description string `json:"description"`
+	ImageURL    string `json:"image_url"`
 }
 
 type UpdateProductRequest struct {
 	Name        string `json:"name" validate:"required"`
 	Price       int64  `json:"price" validate:"required,min=0"`
 	IsAvailable bool   `json:"is_available"`
+	Description string `json:"description"`
+	ImageURL    string `json:"image_url"`
+	CategoryID  uint   `json:"category_id"`
 }
 
 // Create handles new product creation
@@ -39,7 +43,7 @@ func (h *ProductHandler) Create(c *fiber.Ctx) error {
 		return err
 	}
 
-	product, err := h.service.CreateProduct(req.Name, req.Price, req.CategoryID, req.Description)
+	product, err := h.service.CreateProduct(req.Name, req.Price, req.CategoryID, req.Description, req.ImageURL)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not create product")
 	}
@@ -81,7 +85,7 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	product, err := h.service.UpdateProduct(uint(id), req.Name, req.Price, req.IsAvailable)
+	product, err := h.service.UpdateProduct(uint(id), req.Name, req.Price, req.IsAvailable, req.Description, req.ImageURL, req.CategoryID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not update product")
 	}

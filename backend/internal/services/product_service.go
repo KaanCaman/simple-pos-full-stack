@@ -16,7 +16,7 @@ func NewProductService(repo repositories.ProductRepository) *ProductService {
 
 // CreateProduct adds a new product
 // Yeni bir ürün ekler
-func (s *ProductService) CreateProduct(name string, price int64, categoryID uint, description string) (*models.Product, error) {
+func (s *ProductService) CreateProduct(name string, price int64, categoryID uint, description, imageURL string) (*models.Product, error) {
 	if price < 0 {
 		return nil, errors.New("price cannot be negative")
 	}
@@ -26,6 +26,7 @@ func (s *ProductService) CreateProduct(name string, price int64, categoryID uint
 		Price:       price,
 		CategoryID:  categoryID,
 		Description: description,
+		ImageURL:    imageURL,
 		IsAvailable: true,
 	}
 
@@ -47,7 +48,7 @@ func (s *ProductService) GetProducts(categoryID *uint) ([]models.Product, error)
 
 // UpdateProduct updates product details
 // Ürün detaylarını günceller
-func (s *ProductService) UpdateProduct(id uint, name string, price int64, isAvailable bool) (*models.Product, error) {
+func (s *ProductService) UpdateProduct(id uint, name string, price int64, isAvailable bool, description, imageURL string, categoryID uint) (*models.Product, error) {
 	product, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -60,6 +61,11 @@ func (s *ProductService) UpdateProduct(id uint, name string, price int64, isAvai
 	product.Name = name
 	product.Price = price
 	product.IsAvailable = isAvailable
+	product.Description = description
+	product.ImageURL = imageURL
+	if categoryID > 0 {
+		product.CategoryID = categoryID
+	}
 
 	if err := s.repo.Update(product); err != nil {
 		return nil, err

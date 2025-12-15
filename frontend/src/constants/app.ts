@@ -16,6 +16,9 @@ export class AppEndPoints {
 
   static readonly API_V1 = {
     BASE: "/api/v1",
+    UPLOADS: {
+      PRODUCT_IMAGE: "/uploads/product-image",
+    },
     ME: "/api/v1/auth/me",
     CATEGORIES: "/api/v1/categories",
     PRODUCTS: "/api/v1/products",

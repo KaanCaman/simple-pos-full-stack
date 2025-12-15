@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { Plus, Search, Edit2, Trash2, Loader2 } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Loader2, Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-hot-toast";
 import { useStore } from "../../../../stores/rootStore";
+import { api } from "../../../../api/axios";
 import type { Product } from "../../../../types/inventory";
+import { useRef } from "react";
+import { AppConstants, AppEndPoints } from "../../../../constants/app";
 
 export const ProductManagement = observer(() => {
   const { t } = useTranslation();
@@ -24,6 +27,11 @@ export const ProductManagement = observer(() => {
     categoryId: "",
     description: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     productStore.fetchProducts();
@@ -50,6 +58,11 @@ export const ProductManagement = observer(() => {
       categoryId: product.category_id.toString(),
       description: product.description || "",
     });
+    setPreviewUrl(
+      product.image_url ? `${AppConstants.API_URL}${product.image_url}` : null
+    );
+    setImageFile(null);
+    setErrors({});
     setShowModal(true);
   };
 
@@ -62,55 +75,109 @@ export const ProductManagement = observer(() => {
       categoryId: "",
       description: "",
     });
+    setPreviewUrl(null);
+    setImageFile(null);
+    setErrors({});
     setShowModal(true);
   };
 
-  const handleSubmit = () => {
-    if (!formData.name.trim() || !formData.categoryId) {
-      toast.error(t("errors.generic")); // Improve validation feedback later
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(t("errors.file_too_large"));
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast.error(t("errors.invalid_file_type"));
+        return;
+      }
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setErrors((prev) => ({ ...prev, image: "" }));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = t("errors.required");
+    if (!formData.categoryId) newErrors.categoryId = t("errors.required");
+    if (!formData.lira) newErrors.price = t("errors.required");
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
       return;
     }
 
-    const priceInCents =
-      parseInt(formData.lira || "0") * 100 + parseInt(formData.kurus || "0");
-    const categoryId = parseInt(formData.categoryId);
+    setIsUploading(true);
+    let imageUrl = editingProduct?.image_url;
 
-    const message = editingProduct
-      ? t("settings.products.confirm_update")
-      : t("settings.products.confirm_create");
-
-    uiStore.showConfirmation({
-      title: editingProduct
-        ? t("settings.products.edit_product")
-        : t("settings.products.add_product"),
-      message,
-      type: "info",
-      onConfirm: async () => {
-        try {
-          if (editingProduct) {
-            await productStore.updateProduct(editingProduct.id, {
-              name: formData.name,
-              price: priceInCents,
-              category_id: categoryId,
-              description: formData.description,
-            });
-            toast.success(t("settings.products.update_success"));
-          } else {
-            await productStore.createProduct({
-              name: formData.name,
-              price: priceInCents,
-              category_id: categoryId,
-              description: formData.description,
-            });
-            toast.success(t("settings.products.create_success"));
+    try {
+      if (imageFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("image", imageFile);
+        const response = await api.post<{ data: { url: string } }>(
+          "/api/v1/uploads/product-image",
+          uploadFormData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
           }
-          setShowModal(false);
-        } catch (error) {
-          console.error("Product operation failed", error);
-          toast.error(t("errors.generic"));
-        }
-      },
-    });
+        );
+        imageUrl = response.data.data.url;
+      } else if (previewUrl === null) {
+        // If preview is cleared, remove image
+        imageUrl = "";
+      }
+
+      const priceInCents =
+        parseInt(formData.lira || "0") * 100 + parseInt(formData.kurus || "0");
+      const categoryId = parseInt(formData.categoryId);
+
+      if (editingProduct) {
+        await productStore.updateProduct(editingProduct.id, {
+          name: formData.name,
+          price: priceInCents,
+          category_id: categoryId,
+          description: formData.description,
+          image_url: imageUrl,
+        });
+        toast.success(t("settings.products.update_success"));
+      } else {
+        await productStore.createProduct({
+          name: formData.name,
+          price: priceInCents,
+          category_id: categoryId,
+          description: formData.description,
+          image_url: imageUrl,
+        });
+        toast.success(t("settings.products.create_success"));
+      }
+
+      // Explicitly refresh lists to ensure UI is up to date
+      await Promise.all([
+        productStore.fetchProducts(),
+        categoryStore.fetchCategories(),
+      ]);
+
+      setShowModal(false);
+    } catch (error) {
+      console.error("Product operation failed", error);
+      toast.error(t("errors.generic"));
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -122,6 +189,12 @@ export const ProductManagement = observer(() => {
       onConfirm: async () => {
         try {
           await productStore.deleteProduct(id);
+
+          await Promise.all([
+            productStore.fetchProducts(),
+            categoryStore.fetchCategories(),
+          ]);
+
           toast.success(t("settings.products.delete_success"));
         } catch (error) {
           console.error("Delete failed", error);
@@ -203,9 +276,17 @@ export const ProductManagement = observer(() => {
               <div
                 className={`h-10 w-10 rounded-lg ${
                   product.category?.color || "bg-gray-500"
-                } flex items-center justify-center text-white font-bold shadow-sm`}
+                } flex items-center justify-center text-white font-bold shadow-sm overflow-hidden`}
               >
-                {product.name[0]}
+                {product.image_url ? (
+                  <img
+                    src={`${AppConstants.API_URL}${product.image_url}`}
+                    alt={product.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  product.name[0]
+                )}
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -271,6 +352,53 @@ export const ProductManagement = observer(() => {
             </div>
 
             <div className="space-y-4">
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t("settings.products.image")}
+                </label>
+                <div className="flex items-center gap-4">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative w-24 h-24 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden transition-colors ${
+                      previewUrl
+                        ? "border-primary-500 bg-gray-50 dark:bg-gray-800"
+                        : "border-gray-300 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500"
+                    }`}
+                  >
+                    {previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center p-2">
+                        <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
+                        <span className="text-[10px] text-gray-500">
+                          {t("common.upload")}
+                        </span>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageSelect}
+                    />
+                  </div>
+                  {previewUrl && (
+                    <button
+                      onClick={handleRemoveImage}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      title={t("common.remove")}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   {t("settings.products.product_name")}
@@ -284,6 +412,9 @@ export const ProductManagement = observer(() => {
                   className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base text-gray-900 dark:text-white"
                   placeholder={t("settings.products.enter_product_name")}
                 />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                )}
               </div>
 
               <div>
@@ -323,6 +454,9 @@ export const ProductManagement = observer(() => {
                     />
                   </div>
                 </div>
+                {errors.price && (
+                  <p className="mt-1 text-sm text-red-500">{errors.price}</p>
+                )}
               </div>
 
               <div>
@@ -345,6 +479,11 @@ export const ProductManagement = observer(() => {
                     </option>
                   ))}
                 </select>
+                {errors.categoryId && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.categoryId}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -367,7 +506,16 @@ export const ProductManagement = observer(() => {
               onClick={handleSubmit}
               className="w-full py-4 bg-primary-500 hover:bg-primary-600 active:scale-[0.98] text-white rounded-xl font-bold text-lg shadow-lg shadow-primary-500/20 transition-all"
             >
-              {editingProduct ? t("common.save") : t("common.create")}
+              {isUploading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  <span>{t("common.processing")}</span>
+                </div>
+              ) : editingProduct ? (
+                t("common.save")
+              ) : (
+                t("common.create")
+              )}
             </button>
           </div>
         </div>

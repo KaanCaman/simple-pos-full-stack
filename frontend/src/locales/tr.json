@@ -14,7 +14,8 @@
     "coming_soon": "Yakında",
     "go_home": "Ana Sayfaya Dön",
     "no_data": "Veri bulunamadı",
-    "addExpense": "Gider Ekle"
+    "addExpense": "Gider Ekle",
+    "upload": "Yükle"
   },
   "dashboard": {
     "menu": {
@@ -206,7 +207,8 @@
       "confirm_update": "Ürün bilgilerini güncellemek istediğinize emin misiniz?",
       "delete_success": "Ürün silindi",
       "create_success": "Ürün oluşturuldu",
-      "update_success": "Ürün güncellendi"
+      "update_success": "Ürün güncellendi",
+      "image": "Fotğraf"
     },
     "expenses": {
       "title": "Gider Yönetimi",
