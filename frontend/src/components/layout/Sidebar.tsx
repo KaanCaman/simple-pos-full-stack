@@ -88,9 +88,15 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
                 <div className="flex flex-col mt-0.5">
                   <span className="text-xs text-green-600 font-medium">
                     {t("dashboard.sidebar.day_started")}:{" "}
-                    {new Date(store.authStore.dayStartTime).toLocaleTimeString(
+                    {new Date(store.authStore.dayStartTime).toLocaleString(
                       "tr-TR",
-                      { hour: "2-digit", minute: "2-digit" }
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
                     )}
                   </span>
                   {isDayTooLong() && (
