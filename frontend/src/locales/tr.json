@@ -2,6 +2,7 @@
   "common": {
     "loading": "Yükleniyor...",
     "welcome": "Hoş Geldiniz!",
+    "create": "Oluştur",
     "save": "Kaydet",
     "cancel": "İptal",
     "confirm": "Onayla",

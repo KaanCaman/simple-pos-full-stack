@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores/rootStore";
 import { useTranslation } from "react-i18next";
 import {
-  LayoutDashboard,
   History,
   Settings,
   UtensilsCrossed,
@@ -34,7 +33,6 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
   }, []);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "dashboard.menu.dashboard", path: "/" },
     { icon: UtensilsCrossed, label: "dashboard.menu.pos", path: "/pos" },
     {
       icon: FileText,

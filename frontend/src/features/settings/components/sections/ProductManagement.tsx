@@ -306,7 +306,7 @@ export const ProductManagement = observer(() => {
                   onChange={(e) =>
                     setFormData({ ...formData, categoryId: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base text-gray-900 dark:text-white"
                 >
                   <option value="">
                     {t("settings.products.select_category")}
@@ -328,7 +328,7 @@ export const ProductManagement = observer(() => {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base"
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-base text-gray-900 dark:text-white"
                   placeholder={t("settings.products.enter_description")}
                   rows={3}
                 />
