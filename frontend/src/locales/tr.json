@@ -105,7 +105,12 @@
     }
   },
   "settings": {
+    "general_settings": "Genel Ayarlar",
+    "general_settings_desc": "Dil ve uygulama tercihleri",
+    "language": "Dil",
+    "language_desc": "Uygulama dilini değiştirin",
     "users": {
+      "user": "Kullanıcı",
       "actions": "Eylemler",
       "title": "Kullanıcılar",
       "subtitle": "Kullanıcıları yönetin",
@@ -122,6 +127,8 @@
       "username": "Kullanıcı Adı",
       "password": "Şifre",
       "pin": "Pin",
+      "change_pin_title": "Pin Değişkiği",
+      "new_pin": "Yeni Pin",
       "placeholders": {
         "username": "Kullanıcı adınızı girin",
         "pin": "Pin numarasını girin"
@@ -129,8 +136,17 @@
       "validation": {
         "username_min": "Kullanıcı adı en az 3 karakter uzunluğunda olmalıdır.",
         "username_alphanum": "Kullanıcı adı alfanumerik olmalıdır.",
-        "pin_numeric": "Pin numarası sadece rakamlardan ve 4 haneli olmalıdır."
+        "pin_numeric": "Pin numarası sadece rakamlardan ve 4 haneli olmalıdır.",
+        "pin_desc": "Pin numarası sadece rakamlardan ve 4 haneli olmalıdır."
       },
+      "messages": {
+        "delete_confirm_title": "Kullanıcı Sil",
+        "delete_confirm_message": "Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+        "delete_success": "Kullanıcı silindi",
+        "update_success": "Kullanıcı güncellendi",
+        "create_success": "Kullanıcı eklendi"
+      },
+      "update": "Güncelle",
       "role": "Rol",
       "confirm": "Onayla",
       "cancel": "İptal",
@@ -152,7 +168,9 @@
       "expense_management": "Gider Yönetimi",
       "expense_management_desc": "İşletme giderlerini takip edin",
       "profile": "Profil Bilgileri",
-      "profile_desc": "Ad, soyad ve iletişim bilgileri"
+      "profile_desc": "Ad, soyad ve iletişim bilgileri",
+      "general_settings": "Genel Ayarlar",
+      "general_settings_desc": "Dil ve uygulama tercihleri"
     },
     "business_management": "İşletme Yönetimi",
     "account_system": "Hesap & Sistem",
@@ -225,7 +243,7 @@
       "amount": "Tutar",
       "description": "Açıklama",
       "description_placeholder": "Örn: Bulaşık Deterjanı",
-      "category": "Kategori",
+      "category": "Kategorif",
       "categories": {
         "market": "Market",
         "bill": "Fatura",
@@ -302,6 +320,7 @@
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "required": "Bu alan zorunlu.",
     "network": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
     "title": "Beklenmeyen bir hata oluştu",
     "contactSupport": "Lütfen sayfayı yenileyin veya destek ekibiyle iletişime geçin.",
