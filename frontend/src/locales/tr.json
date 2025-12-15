@@ -8,7 +8,8 @@
     "edit": "Düzenle",
     "add": "Ekle",
     "search": "Ara...",
-    "search_placeholder": "Menü veya masa ara..."
+    "search_placeholder": "Menü veya masa ara...",
+    "coming_soon": "Yakında"
   },
   "dashboard": {
     "menu": {
@@ -94,6 +95,41 @@
     }
   },
   "settings": {
+    "users": {
+      "actions": "Eylemler",
+      "title": "Kullanıcılar",
+      "subtitle": "Kullanıcıları yönetin",
+      "add_user_title": "Yeni Kullanıcı Ekle",
+      "edit_user_title": "Kullanıcı Düzenle",
+      "create": "Oluştur",
+      "admin": "Yönetici",
+      "waiter": "Garson",
+      "add_user": "Kullanıcı Ekle",
+      "edit_user": "Kullanıcı Düzenle",
+      "delete_user": "Kullanıcı Sil",
+      "name": "Ad",
+      "surname": "Soyad",
+      "username": "Kullanıcı Adı",
+      "password": "Şifre",
+      "pin": "Pin",
+      "placeholders": {
+        "username": "Kullanıcı adınızı girin",
+        "pin": "Pin numarasını girin"
+      },
+      "validation": {
+        "username_min": "Kullanıcı adı en az 3 karakter uzunluğunda olmalıdır.",
+        "username_alphanum": "Kullanıcı adı alfanumerik olmalıdır.",
+        "pin_numeric": "Pin numarası sadece rakamlardan ve 4 haneli olmalıdır."
+      },
+      "role": "Rol",
+      "confirm": "Onayla",
+      "cancel": "İptal",
+      "delete": "Sil",
+      "edit": "Düzenle",
+      "add": "Ekle",
+      "search": "Ara...",
+      "search_placeholder": "Kullanıcı ara..."
+    },
     "sections": {
       "user_management": "Kullanıcı Yönetimi",
       "user_management_desc": "Personel ve yetki yönetimi",
@@ -104,8 +140,13 @@
       "category_management": "Kategori Yönetimi",
       "category_management_desc": "Ürün kategorilerini düzenleyin",
       "expense_management": "Gider Yönetimi",
-      "expense_management_desc": "İşletme giderlerini takip edin"
+      "expense_management_desc": "İşletme giderlerini takip edin",
+      "profile": "Profil Bilgileri",
+      "profile_desc": "Ad, soyad ve iletişim bilgileri"
     },
+    "business_management": "İşletme Yönetimi",
+    "account_system": "Hesap & Sistem",
+    "subtitle": "Sistem ve hesap ayarlarınızı yönetin",
     "tables": {
       "title": "Masa Yönetimi",
       "add_table": "Masa Ekle",
@@ -119,7 +160,9 @@
       "delete_success": "Masa silindi",
       "create_success": "Masa oluşturuldu",
       "update_success": "Masa güncellendi",
-      "enter_table_name": "Masa adı giriniz (Örn: Bahçe-12)"
+      "enter_table_name": "Masa adı giriniz (Örn: Bahçe-12)",
+      "desc": "Masa düzenini ve durumlarını yönetin",
+      "empty_state": "Henüz hiç masa oluşturulmamış."
     },
     "categories": {
       "title": "Kategori Yönetimi",
@@ -155,6 +198,19 @@
       "delete_success": "Ürün silindi",
       "create_success": "Ürün oluşturuldu",
       "update_success": "Ürün güncellendi"
+    },
+    "expenses": {
+      "title": "Gider Yönetimi",
+      "desc": "İşletme giderlerini takip edin ve yönetin",
+      "add_expense": "Yeni Gider",
+      "edit_expense": "Gider Düzenle",
+      "search_placeholder": "Gider ara...",
+      "empty_state": "Henüz gider kaydı bulunmuyor.",
+      "confirm_delete": "Bu gider kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      "confirm_delete_title": "Gideri Sil",
+      "delete_success": "Gider silindi",
+      "create_success": "Gider oluşturuldu",
+      "update_success": "Gider güncellendi"
     }
   },
   "reports": {

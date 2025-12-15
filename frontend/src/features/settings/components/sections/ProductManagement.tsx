@@ -145,7 +145,7 @@ export const ProductManagement = observer(() => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={t("common.search_placeholder")}
+            placeholder={t("common.search")}
             className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#1A1D1F] border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
           />
         </div>

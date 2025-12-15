@@ -18,7 +18,7 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 }
 
 type CreateUserRequest struct {
-	Name string `json:"name" validate:"required,min=2"`
+	Name string `json:"name" validate:"required,min=3,alphanum"`
 	Pin  string `json:"pin" validate:"required,numeric,len=4"`
 	Role string `json:"role" validate:"required,oneof=admin waiter"`
 }
@@ -37,8 +37,17 @@ func (h *UserHandler) Create(c *fiber.Ctx) error {
 		return err
 	}
 
+	// Restrict creating new Admins
+	// Yeni Admin oluşturmayı engelle
+	if req.Role == "admin" {
+		return fiber.NewError(fiber.StatusForbidden, "Creating new admin users is not allowed")
+	}
+
 	user, err := h.service.CreateUser(req.Name, req.Pin, req.Role)
 	if err != nil {
+		if err.Error() == "user already exists" {
+			return fiber.NewError(fiber.StatusConflict, "Username is already taken")
+		}
 		return fiber.NewError(fiber.StatusInternalServerError, "Could not create user")
 	}
 
@@ -75,7 +84,7 @@ func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
 }
 
 type UpdateUserRequest struct {
-	Name     string `json:"name" validate:"required,min=2"`
+	Name     string `json:"name" validate:"required,min=3"`
 	Role     string `json:"role" validate:"required,oneof=admin waiter"`
 	IsActive bool   `json:"is_active"`
 }

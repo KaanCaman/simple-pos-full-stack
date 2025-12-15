@@ -45,7 +45,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	// Check if day is open
-	activePeriod, err := h.workPeriodRepo.FindActivePeriod()
+	activePeriod, _ := h.workPeriodRepo.FindActivePeriod()
 	isDayOpen := activePeriod != nil
 	var workPeriodID uint
 	if isDayOpen {
@@ -73,7 +73,7 @@ func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	}
 
 	// Check day status
-	activePeriod, err := h.workPeriodRepo.FindActivePeriod()
+	activePeriod, _ := h.workPeriodRepo.FindActivePeriod()
 	isDayOpen := activePeriod != nil
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "User details", fiber.Map{

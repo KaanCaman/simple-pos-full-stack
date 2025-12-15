@@ -15,6 +15,7 @@ import { TableManagement } from "./sections/TableManagement";
 import { CategoryManagement } from "./sections/CategoryManagement";
 import { ProductManagement } from "./sections/ProductManagement";
 import { ExpenseManagement } from "./sections/ExpenseManagement";
+import { UserManagement } from "./sections/UserManagement";
 
 type SectionId =
   | "profile"
@@ -101,9 +102,7 @@ export const SettingsPage = observer(() => {
             "settings.sections.user_management_desc",
             "Garson hesapları ve yetkiler"
           ),
-          component: (
-            <div className="p-4">{t("common.coming_soon", "Yakında")}</div>
-          ),
+          component: <UserManagement />,
         },
       ],
     },
