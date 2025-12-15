@@ -86,6 +86,7 @@ type WorkPeriodRepository interface {
 	FindActivePeriod() (*models.WorkPeriod, error)
 	Update(period *models.WorkPeriod) error
 	GetPeriodsByDate(date time.Time) ([]models.WorkPeriod, error)
+	GetPeriodsBetweenDates(start, end time.Time) ([]models.WorkPeriod, error)
 	FindByID(id uint) (*models.WorkPeriod, error)
 }
 

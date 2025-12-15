@@ -4,8 +4,6 @@ import (
 	"errors"
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -55,44 +53,21 @@ func (s *TransactionService) AddExpense(amount int64, description, category, pay
 	return transaction, nil
 }
 
-// ListExpenses returns expenses within a date range or active scope
+// ListExpenses returns expenses for the ACTIVE work period only
 func (s *TransactionService) ListExpenses(startDate, endDate time.Time, scope string) ([]models.Transaction, error) {
-	if scope == "active" {
-		activePeriod, err := s.workPeriodRepo.FindActivePeriod()
-		if err != nil {
-			return nil, err
-		}
-		if activePeriod != nil {
-			return s.repo.FindAllByWorkPeriodID(activePeriod.ID, "EXPENSE")
-		}
-		return []models.Transaction{}, nil
-	}
-
-	// Specific Work Period Scope
-	if strings.HasPrefix(scope, "period_") {
-		periodIDStr := strings.TrimPrefix(scope, "period_")
-		periodID, err := strconv.ParseUint(periodIDStr, 10, 32)
-		if err == nil {
-			return s.repo.FindAllByWorkPeriodID(uint(periodID), "EXPENSE")
-		}
-	}
-
-	// Strict WorkPeriod Logic for History (Date-based)
-	periods, err := s.workPeriodRepo.GetPeriodsByDate(startDate)
+	// Always scope to Active Work Period for Expense Management
+	// Gider Yönetimi için her zaman Aktif Çalışma Dönemine göre kapsam belirle
+	activePeriod, err := s.workPeriodRepo.FindActivePeriod()
 	if err != nil {
 		return nil, err
 	}
 
-	if len(periods) == 0 {
+	if activePeriod == nil {
+		// No active period = No visible expenses
 		return []models.Transaction{}, nil
 	}
 
-	var ids []uint
-	for _, p := range periods {
-		ids = append(ids, p.ID)
-	}
-
-	return s.repo.FindAllByWorkPeriodIDs(ids, "EXPENSE")
+	return s.repo.FindAllByWorkPeriodID(activePeriod.ID, "EXPENSE")
 }
 
 // UpdateExpense updates an existing expense
@@ -108,6 +83,16 @@ func (s *TransactionService) UpdateExpense(id uint, amount int64, description st
 
 	if tx.Type != "EXPENSE" {
 		return nil, errors.New("only expenses can be updated")
+	}
+
+	// Active Work Period Check
+	// Aktif çalışma dönemi kontrolü
+	activePeriod, err := s.workPeriodRepo.FindActivePeriod()
+	if err != nil {
+		return nil, err
+	}
+	if activePeriod == nil || tx.WorkPeriodID != activePeriod.ID {
+		return nil, errors.New("can only modify expenses in active work period")
 	}
 
 	tx.Amount = amount
@@ -129,6 +114,16 @@ func (s *TransactionService) DeleteExpense(id uint) error {
 
 	if tx.Type != "EXPENSE" {
 		return errors.New("only expenses can be deleted")
+	}
+
+	// Active Work Period Check
+	// Aktif çalışma dönemi kontrolü
+	activePeriod, err := s.workPeriodRepo.FindActivePeriod()
+	if err != nil {
+		return err
+	}
+	if activePeriod == nil || tx.WorkPeriodID != activePeriod.ID {
+		return errors.New("can only modify expenses in active work period")
 	}
 
 	return s.repo.Delete(id)
