@@ -219,7 +219,26 @@
       "confirm_delete_title": "Gideri Sil",
       "delete_success": "Gider silindi",
       "create_success": "Gider oluşturuldu",
-      "update_success": "Gider güncellendi"
+      "update_success": "Gider güncellendi",
+      "amount": "Tutar",
+      "description": "Açıklama",
+      "description_placeholder": "Örn: Bulaşık Deterjanı",
+      "category": "Kategori",
+      "categories": {
+        "market": "Market",
+        "bill": "Fatura",
+        "maintenance": "Bakım/Onarım",
+        "salary": "Personel/Maaş",
+        "other": "Diğer"
+      },
+      "payment_method": "Ödeme Yöntemi",
+      "cash": "Nakit",
+      "credit_card": "Kredi Kartı",
+      "save_expense": "Gider Kaydet",
+      "saving": "Kaydediliyor...",
+      "update": "Güncelle",
+      "add_subtitle": "Kasadan çıkış yap",
+      "edit_subtitle": "Mevcut gideri güncelle"
     }
   },
   "reports": {
