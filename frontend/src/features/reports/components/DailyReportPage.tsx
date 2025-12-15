@@ -121,9 +121,11 @@ export const DailyReportPage = observer(() => {
           // Also update auth store status if needed, though simple reload might be safer for full app state reset
           // But for SPA experience:
           authStore.checkAuth();
-        } catch (e) {
+        } catch (e: any) {
           console.error(e);
-          toast.error("Gün kapatılamadı.");
+          const message =
+            e.response?.data?.message || e.message || "Gün kapatılamadı.";
+          toast.error(message);
         }
         uiStore.closeConfirmation();
       },

@@ -58,6 +58,16 @@ func (s *ManagementService) EndDay(userID uint) (*models.DailyReport, error) {
 		return nil, errors.New("no active work period found")
 	}
 
+	// 0. Check for Active Orders
+	// Aktif sipariş kontrolü
+	hasActiveOrders, err := s.orderRepo.HasActiveOrders()
+	if err != nil {
+		return nil, err
+	}
+	if hasActiveOrders {
+		return nil, errors.New("cannot close day with active orders. please close all tables first")
+	}
+
 	// 1. Calculate Stats for this Work Period (Strictly by ID)
 	now := time.Now()
 
