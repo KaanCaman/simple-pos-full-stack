@@ -46,7 +46,18 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
       path: "/reports/history",
     },
     { icon: Settings, label: "dashboard.menu.settings", path: "/settings" },
-  ];
+  ].filter((item) => {
+    // Admin sees everything
+    if (store.authStore.user?.role === "admin") return true;
+
+    // Waiter only sees POS
+    // Garson sadece POS (Masa/Sipariş) ekranını görür
+    if (store.authStore.user?.role === "waiter") {
+      return item.path === "/pos";
+    }
+
+    return false;
+  });
 
   // Calculate if day has been open for more than 13 hours
   const isDayTooLong = () => {
