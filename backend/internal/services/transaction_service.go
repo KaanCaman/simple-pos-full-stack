@@ -4,6 +4,8 @@ import (
 	"errors"
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -53,10 +55,19 @@ func (s *TransactionService) AddExpense(amount int64, description, category, pay
 	return transaction, nil
 }
 
-// ListExpenses returns expenses for the ACTIVE work period only
+// ListExpenses returns expenses for the ACTIVE work period or specific historical period
 func (s *TransactionService) ListExpenses(startDate, endDate time.Time, scope string) ([]models.Transaction, error) {
-	// Always scope to Active Work Period for Expense Management
-	// Gider Yönetimi için her zaman Aktif Çalışma Dönemine göre kapsam belirle
+	// 1. Handle "period_ID" scope (Historical Report View)
+	if strings.HasPrefix(scope, "period_") {
+		idStr := strings.TrimPrefix(scope, "period_")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return nil, errors.New("invalid period id")
+		}
+		return s.repo.FindAllByWorkPeriodID(uint(id), "EXPENSE")
+	}
+
+	// 2. Default: Active Work Period (Expense Management)
 	activePeriod, err := s.workPeriodRepo.FindActivePeriod()
 	if err != nil {
 		return nil, err
