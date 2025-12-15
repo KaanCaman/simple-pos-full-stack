@@ -27,28 +27,18 @@ export const StartDayPage = observer(() => {
 
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {t("common.welcome", "Hoş Geldiniz!")}
+            {t("common.welcome")}
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
-            {t(
-              "day.start_day_message",
-              "Sistemi kullanmaya başlamak için lütfen günü başlatın."
-            )}
+            {t("day.start_day_message")}
           </p>
         </div>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl flex items-start gap-3 text-left">
           <AlertCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
           <div className="text-sm text-blue-700 dark:text-blue-300">
-            <p className="font-medium">
-              {t("day.why_start_day_title", "Neden Günü Başlatmalıyım?")}
-            </p>
-            <p className="mt-1 opacity-90">
-              {t(
-                "day.why_start_day_desc",
-                "Satış ve raporlama işlemlerinin doğru tarihe kaydedilmesi için iş gününün başlatılması gerekmektedir."
-              )}
-            </p>
+            <p className="font-medium">{t("day.why_start_day_title")}</p>
+            <p className="mt-1 opacity-90">{t("day.why_start_day_desc")}</p>
           </div>
         </div>
 
@@ -57,7 +47,7 @@ export const StartDayPage = observer(() => {
           className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold py-4 rounded-xl shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           <Sun className="w-5 h-5" />
-          {t("day.start_day_button", "Günü Başlat")}
+          {t("day.start_day_button")}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Yükleniyor...",
+    "welcome": "Hoş Geldiniz!",
     "save": "Kaydet",
     "cancel": "İptal",
     "confirm": "Onayla",
@@ -75,7 +76,9 @@
     "pay_credit_hint": "KART (POS)",
     "empty_order": "Sipariş henüz boş",
     "table_order_title": "Masa {{table}} Siparişi",
-    "order_info": "Sipariş #{{id}} • Garson: {{waiter}}"
+    "order_info": "Sipariş #{{id}} • Garson: {{waiter}}",
+    "vat_rate": "KDV (%{{rate}})",
+    "table_title": "Masa {{id}}"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -86,6 +89,7 @@
     "password": "Şifre",
     "password_placeholder": "Şifrenizi girin",
     "forgotPassword": "Şifremi Unuttum",
+    "password_numeric": "Şifre sadece rakamlardan oluşmalıdır",
     "loginError": "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.",
     "theme": {
       "toggle": "Temayı Değiştir",
@@ -251,7 +255,16 @@
     "no_reports_history": "Henüz kaydedilmiş rapor bulunmuyor.",
     "period_date": "Dönem / Tarih",
     "active": "Aktif",
-    "refresh": "Yenile"
+    "refresh": "Yenile",
+    "stat_total_sales": "Toplam Satış",
+    "stat_cash_pos": "Nakit / POS",
+    "stat_total_expenses": "Toplam Gider",
+    "stat_net_profit": "Net Kar",
+    "tab_orders": "Sipariş Geçmişi",
+    "tab_expenses": "Giderler",
+    "payment_cash": "Nakit",
+    "payment_credit": "Kredi Kartı",
+    "loading_error": "Veriler yüklenirken bir hata oluştu"
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores/rootStore";
 import { reportService, type DailyReport } from "../services/reportService";
@@ -29,6 +30,7 @@ import { PaymentMethodChart } from "./charts/PaymentMethodChart";
 import toast from "react-hot-toast";
 
 export const DailyReportPage = observer(() => {
+  const { t } = useTranslation();
   const { uiStore, authStore } = useStore();
   const { date } = useParams();
   const navigate = useNavigate();
@@ -83,7 +85,7 @@ export const DailyReportPage = observer(() => {
         setExpenses(expensesRes.data.data);
     } catch (error) {
       console.error("General loading error", error);
-      toast.error("Veriler yüklenirken bir hata oluştu");
+      toast.error(t("reports.loading_error"));
     } finally {
       setLoading(false);
     }
@@ -101,18 +103,17 @@ export const DailyReportPage = observer(() => {
 
   const handleEndDay = () => {
     uiStore.showConfirmation({
-      title: "Günü Kapat",
-      message:
-        "Günü kapatmak istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm açık masaları etkileyebilir. Gün sonu raporu oluşturulacaktır.",
-      confirmText: "Günü Kapat",
-      cancelText: "İptal",
+      title: t("reports.end_day_confirm_title"),
+      message: t("reports.end_day_confirm_message"),
+      confirmText: t("reports.end_day"),
+      cancelText: t("common.cancel"),
       type: "danger",
       onConfirm: async () => {
         try {
           if (!authStore.user) return;
 
           await managementService.endDay(authStore.user.id);
-          toast.success("Gün başarıyla kapatıldı.");
+          toast.success(t("reports.end_day_success"));
 
           // Refresh data or navigate to history
           // Calling loadData will fetch the now-finalized report
@@ -135,7 +136,7 @@ export const DailyReportPage = observer(() => {
   if (loading) {
     return (
       <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-        Yükleniyor...
+        {t("common.loading")}
       </div>
     );
   }
@@ -148,17 +149,16 @@ export const DailyReportPage = observer(() => {
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <AlertTriangle className="h-12 w-12 text-yellow-500 mb-4" />
         <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-          Rapor Bulunamadı
+          {t("reports.report_not_found")}
         </h3>
         <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-md">
-          Veriler yüklenirken bir sorun oluştu veya bu tarih için kayıt
-          bulunmuyor. Lütfen sayfayı yenilemeyi deneyin.
+          {t("reports.report_not_found_desc")}
         </p>
         <button
           onClick={() => window.location.reload()}
           className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          Yenile
+          {t("reports.refresh")}
         </button>
       </div>
     );
@@ -171,7 +171,7 @@ export const DailyReportPage = observer(() => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-blue-500" />
-            {isHistoryView ? "Geçmiş Gün Raporu" : "Günlük Rapor (Canlı)"}
+            {isHistoryView ? t("reports.history_title") : t("reports.title")}
           </h1>
           <p className="text-gray-500 mt-1">
             {report
@@ -181,7 +181,7 @@ export const DailyReportPage = observer(() => {
                   month: "long",
                   day: "numeric",
                 })
-              : "Yükleniyor..."}
+              : t("common.loading")}
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export const DailyReportPage = observer(() => {
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Listeye Dön</span>
+            <span>{t("reports.back_to_list")}</span>
           </button>
         ) : (
           <button
@@ -199,31 +199,31 @@ export const DailyReportPage = observer(() => {
             className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
           >
             <Clock className="h-5 w-5" />
-            <span>Geçmiş Raporlar</span>
+            <span>{t("reports.history_reports")}</span>
           </button>
         )}
       </div>
       {/* Header & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Toplam Satış"
+          title={t("reports.stat_total_sales")}
           value={formatCurrency((report.total_sales || 0) / 100)}
           icon={<DollarSign className="h-6 w-6 text-green-500" />}
         />
         <StatCard
-          title="Nakit / POS"
+          title={t("reports.stat_cash_pos")}
           value={`${formatCurrency(
             (report.cash_sales || 0) / 100
           )} / ${formatCurrency((report.pos_sales || 0) / 100)}`}
           icon={<CreditCard className="h-6 w-6 text-blue-500" />}
         />
         <StatCard
-          title="Toplam Gider"
+          title={t("reports.stat_total_expenses")}
           value={formatCurrency((report.total_expenses || 0) / 100)}
           icon={<TrendingDown className="h-6 w-6 text-red-500" />}
         />
         <StatCard
-          title="Net Kar"
+          title={t("reports.stat_net_profit")}
           value={formatCurrency((report.net_profit || 0) / 100)}
           icon={<TrendingUp className="h-6 w-6 text-purple-500" />}
         />
@@ -251,22 +251,24 @@ export const DailyReportPage = observer(() => {
       {/* Tabs */}
       <Tab.Group>
         <Tab.List className="flex space-x-1 rounded-xl bg-gray-200 dark:bg-gray-800 p-1">
-          {["Sipariş Geçmişi", "Giderler"].map((category) => (
-            <Tab
-              key={category}
-              className={({ selected }) =>
-                clsx(
-                  "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
-                  "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
-                  selected
-                    ? "bg-white dark:bg-gray-700 shadow text-blue-700 dark:text-blue-100"
-                    : "text-gray-500 dark:text-gray-400 hover:bg-white/[0.12] hover:text-gray-700 dark:hover:text-gray-200"
-                )
-              }
-            >
-              {category}
-            </Tab>
-          ))}
+          {[t("reports.tab_orders"), t("reports.tab_expenses")].map(
+            (category) => (
+              <Tab
+                key={category}
+                className={({ selected }) =>
+                  clsx(
+                    "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
+                    "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
+                    selected
+                      ? "bg-white dark:bg-gray-700 shadow text-blue-700 dark:text-blue-100"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-white/[0.12] hover:text-gray-700 dark:hover:text-gray-200"
+                  )
+                }
+              >
+                {category}
+              </Tab>
+            )
+          )}
         </Tab.List>
         <Tab.Panels className="mt-4">
           {/* Orders Panel */}
@@ -409,24 +411,22 @@ export const DailyReportPage = observer(() => {
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
           <h3 className="text-lg font-bold text-red-500 mb-4 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Tehlikeli Bölge
+            {t("reports.danger_zone")}
           </h3>
           <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <h4 className="font-bold text-red-700 dark:text-red-400 mb-1">
-                Günü Kapat
+                {t("reports.end_day")}
               </h4>
               <p className="text-sm text-red-600/80 dark:text-red-400/70">
-                Gün sonu işlemini başlatır. Tüm açık masalar otomatik olarak
-                kapatılmaz, kontrol edilmelidir. Bu işlemden sonra yeni sipariş
-                alınamaz.
+                {t("reports.end_day_desc")}
               </p>
             </div>
             <button
               onClick={handleEndDay}
               className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors whitespace-nowrap"
             >
-              Günü Kapat
+              {t("reports.end_day")}
             </button>
           </div>
         </div>
