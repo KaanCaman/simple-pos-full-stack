@@ -16,14 +16,7 @@ import { AppConstants } from "../../../constants/app";
 import { logger } from "../../../utils/logger";
 import { useTheme } from "../../../providers/ThemeProvider";
 
-// Zod schema for login validation.
-// Giriş doğrulama için Zod şeması.
-const loginSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(4).regex(/^\d+$/, "Password must be numeric"),
-});
-
-// Login Page Component.
+// Zod schema for// Login Page Component.
 // Giriş Sayfası Bileşeni.
 export const LoginPage = observer(() => {
   const { t } = useTranslation();
@@ -56,6 +49,13 @@ export const LoginPage = observer(() => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Zod schema for login validation.
+    // Giriş doğrulama için Zod şeması.
+    const loginSchema = z.object({
+      username: z.string().min(3),
+      password: z.string().min(4).regex(/^\d+$/, t("auth.password_numeric")),
+    });
 
     // Validate input using Zod.
     const result = loginSchema.safeParse({ username, password });

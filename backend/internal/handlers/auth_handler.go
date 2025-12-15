@@ -45,7 +45,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	// Check if day is open
-	activePeriod, err := h.workPeriodRepo.FindActivePeriod()
+	activePeriod, _ := h.workPeriodRepo.FindActivePeriod()
 	isDayOpen := activePeriod != nil
 	var workPeriodID uint
 	if isDayOpen {
@@ -65,7 +65,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 // Mevcut kimliği doğrulanmış kullanıcıyı döndürür
 func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	// Get UserID from middleware context (set by Protected middleware)
-	userID := c.Locals("userID").(int)
+	userID := c.Locals("userID").(uint)
 
 	user, err := h.service.GetUser(uint(userID))
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	}
 
 	// Check day status
-	activePeriod, err := h.workPeriodRepo.FindActivePeriod()
+	activePeriod, _ := h.workPeriodRepo.FindActivePeriod()
 	isDayOpen := activePeriod != nil
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "User details", fiber.Map{

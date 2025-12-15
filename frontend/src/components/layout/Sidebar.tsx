@@ -4,12 +4,12 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores/rootStore";
 import { useTranslation } from "react-i18next";
 import {
-  LayoutDashboard,
   History,
   Settings,
   UtensilsCrossed,
   FileText,
   X,
+  LogOut,
 } from "lucide-react";
 import { AppConstants } from "../../constants/app";
 
@@ -33,7 +33,6 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
   }, []);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "dashboard.menu.dashboard", path: "/" },
     { icon: UtensilsCrossed, label: "dashboard.menu.pos", path: "/pos" },
     {
       icon: FileText,
@@ -46,7 +45,18 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
       path: "/reports/history",
     },
     { icon: Settings, label: "dashboard.menu.settings", path: "/settings" },
-  ];
+  ].filter((item) => {
+    // Admin sees everything
+    if (store.authStore.user?.role === "admin") return true;
+
+    // Waiter only sees POS
+    // Garson sadece POS (Masa/Sipariş) ekranını görür
+    if (store.authStore.user?.role === "waiter") {
+      return item.path === "/pos";
+    }
+
+    return false;
+  });
 
   // Calculate if day has been open for more than 13 hours
   const isDayTooLong = () => {
@@ -88,9 +98,15 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
                 <div className="flex flex-col mt-0.5">
                   <span className="text-xs text-green-600 font-medium">
                     {t("dashboard.sidebar.day_started")}:{" "}
-                    {new Date(store.authStore.dayStartTime).toLocaleTimeString(
+                    {new Date(store.authStore.dayStartTime).toLocaleString(
                       "tr-TR",
-                      { hour: "2-digit", minute: "2-digit" }
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
                     )}
                   </span>
                   {isDayTooLong() && (
@@ -137,6 +153,17 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
             );
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1D1F]">
+          <button
+            onClick={() => store.authStore.logout()}
+            className="flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>{t("auth.logout")}</span>
+          </button>
+        </div>
       </aside>
     </>
   );

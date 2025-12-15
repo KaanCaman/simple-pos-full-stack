@@ -6,6 +6,7 @@ import (
 	"simple-pos/internal/middleware"
 	"simple-pos/internal/platform/database"
 	"simple-pos/internal/routes"
+	"simple-pos/internal/seeder"
 	"simple-pos/pkg/config"
 	"simple-pos/pkg/logger"
 
@@ -25,6 +26,9 @@ func New(cfg *config.Config) *fiber.App {
 	// 3. Migrate Database
 	database.Migrate()
 
+	// 4. Seed Database
+	seeder.Seed(database.DB, cfg)
+
 	// 4. Setup Fiber
 	app := fiber.New(fiber.Config{
 		ErrorHandler: middleware.ErrorHandler,
@@ -35,7 +39,10 @@ func New(cfg *config.Config) *fiber.App {
 	app.Use(middleware.RecoveryMiddleware())      // Recover from panics with Zap
 	app.Use(cors.New())
 
-	// 5. Register Routes (handles all dependency wiring)
+	// 5. Static Files
+	app.Static("/uploads", "./uploads")
+
+	// 6. Register Routes (handles all dependency wiring)
 	routes.RegisterRoutes(app, database.DB, cfg)
 
 	log.Println("Server initialized in " + cfg.Environment + " mode")

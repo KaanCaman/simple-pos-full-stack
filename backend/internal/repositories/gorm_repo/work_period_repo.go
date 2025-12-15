@@ -63,6 +63,16 @@ func (r *workPeriodRepository) GetPeriodsByDate(date time.Time) ([]models.WorkPe
 	return periods, nil
 }
 
+// GetPeriodsBetweenDates finds work periods that started within the given date range
+// Belirtilen tarih aralığında başlayan çalışma dönemlerini bulur
+func (r *workPeriodRepository) GetPeriodsBetweenDates(start, end time.Time) ([]models.WorkPeriod, error) {
+	var periods []models.WorkPeriod
+	if err := r.db.Where("start_time >= ? AND start_time <= ?", start, end).Find(&periods).Error; err != nil {
+		return nil, err
+	}
+	return periods, nil
+}
+
 // FindByID finds a work period by ID
 //
 //	Bir work period ID'siyle bulur

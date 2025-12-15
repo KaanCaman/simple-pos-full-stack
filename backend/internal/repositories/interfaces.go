@@ -48,6 +48,8 @@ type OrderRepository interface {
 	FindByTableID(tableID uint, status string) ([]models.Order, error)
 	FindByWorkPeriod(periodID uint) ([]models.Order, error)
 	FindByWorkPeriodIDs(periodIDs []uint) ([]models.Order, error)
+	GetOrderWithDetails(orderID uint) (*models.Order, error)
+	HasActiveOrders() (bool, error)
 	Update(order *models.Order) error
 	Delete(id uint) error
 
@@ -86,6 +88,7 @@ type WorkPeriodRepository interface {
 	FindActivePeriod() (*models.WorkPeriod, error)
 	Update(period *models.WorkPeriod) error
 	GetPeriodsByDate(date time.Time) ([]models.WorkPeriod, error)
+	GetPeriodsBetweenDates(start, end time.Time) ([]models.WorkPeriod, error)
 	FindByID(id uint) (*models.WorkPeriod, error)
 }
 

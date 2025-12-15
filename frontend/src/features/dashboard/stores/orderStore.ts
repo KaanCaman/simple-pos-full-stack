@@ -85,6 +85,22 @@ export class OrderStore {
   async addItem(productId: number, quantity: number = 1, note?: string) {
     if (!this.currentOrder) return;
 
+    // Check if the product is already in the cart
+    // Ürün zaten sepette mi kontrol et
+    const existingItem = this.currentOrder.items?.find(
+      (item) => item.product_id === productId
+    );
+
+    if (existingItem) {
+      // If exists, update quantity
+      // Varsa miktarını güncelle
+      await this.updateItemQuantity(
+        existingItem.id,
+        existingItem.quantity + quantity
+      );
+      return;
+    }
+
     this.isLoading = true;
     try {
       const response = await orderService.addItem(this.currentOrder.id, {

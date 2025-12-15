@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { CategoryTabs } from "./CategoryTabs";
 import { ProductGrid } from "./ProductGrid";
 import { OrderSummary } from "./OrderSummary";
@@ -14,6 +15,7 @@ interface OrderItem {
 }
 
 export const OrderPage = observer(() => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState(1);
@@ -77,10 +79,10 @@ export const OrderPage = observer(() => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Masa {id}
+              {t("pos.table_title", { id })}
             </h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Sipariş eklemek için ürün seçin
+              {t("pos.select_product")}
             </p>
           </div>
         </div>

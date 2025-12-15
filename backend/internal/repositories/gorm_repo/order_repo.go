@@ -16,6 +16,26 @@ func NewOrderRepository(db *gorm.DB) repositories.OrderRepository {
 	return &orderRepository{db: db}
 }
 
+func (r *orderRepository) GetOrderWithDetails(orderID uint) (*models.Order, error) {
+	var order models.Order
+	err := r.db.Preload("Items").Preload("Items.Product").First(&order, orderID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
+}
+
+func (r *orderRepository) HasActiveOrders() (bool, error) {
+	var count int64
+	err := r.db.Model(&models.Order{}).
+		Where("status NOT IN ('COMPLETED', 'CANCELLED')").
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *orderRepository) Create(order *models.Order) error {
 	return r.db.Create(order).Error
 }

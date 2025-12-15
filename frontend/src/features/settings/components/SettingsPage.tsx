@@ -15,6 +15,7 @@ import { TableManagement } from "./sections/TableManagement";
 import { CategoryManagement } from "./sections/CategoryManagement";
 import { ProductManagement } from "./sections/ProductManagement";
 import { ExpenseManagement } from "./sections/ExpenseManagement";
+import { UserManagement } from "./sections/UserManagement";
 
 type SectionId =
   | "profile"
@@ -82,18 +83,6 @@ export const SettingsPage = observer(() => {
       title: t("settings.account_system", "Hesap & Sistem"),
       items: [
         {
-          id: "profile",
-          icon: User,
-          label: t("settings.sections.profile", "Profil Bilgileri"),
-          desc: t(
-            "settings.sections.profile_desc",
-            "Ad, soyad ve iletişim bilgileri"
-          ),
-          component: (
-            <div className="p-4">{t("common.coming_soon", "Yakında")}</div>
-          ),
-        },
-        {
           id: "staff",
           icon: Shield,
           label: t("settings.sections.user_management", "Personel Yönetimi"),
@@ -101,9 +90,7 @@ export const SettingsPage = observer(() => {
             "settings.sections.user_management_desc",
             "Garson hesapları ve yetkiler"
           ),
-          component: (
-            <div className="p-4">{t("common.coming_soon", "Yakında")}</div>
-          ),
+          component: <UserManagement />,
         },
       ],
     },

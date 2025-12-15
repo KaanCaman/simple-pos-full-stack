@@ -1,6 +1,8 @@
 {
   "common": {
     "loading": "Yükleniyor...",
+    "welcome": "Hoş Geldiniz!",
+    "create": "Oluştur",
     "save": "Kaydet",
     "cancel": "İptal",
     "confirm": "Onayla",
@@ -8,7 +10,12 @@
     "edit": "Düzenle",
     "add": "Ekle",
     "search": "Ara...",
-    "search_placeholder": "Menü veya masa ara..."
+    "search_placeholder": "Menü veya masa ara...",
+    "coming_soon": "Yakında",
+    "go_home": "Ana Sayfaya Dön",
+    "no_data": "Veri bulunamadı",
+    "addExpense": "Gider Ekle",
+    "upload": "Yükle"
   },
   "dashboard": {
     "menu": {
@@ -74,7 +81,10 @@
     "pay_credit_hint": "KART (POS)",
     "empty_order": "Sipariş henüz boş",
     "table_order_title": "Masa {{table}} Siparişi",
-    "order_info": "Sipariş #{{id}} • Garson: {{waiter}}"
+    "order_info": "Sipariş #{{id}} • Garson: {{waiter}}",
+    "vat_rate": "KDV (%{{rate}})",
+    "table_title": "Masa {{id}}",
+    "order_cancelled": "Sipariş İptal Edildi"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -85,6 +95,7 @@
     "password": "Şifre",
     "password_placeholder": "Şifrenizi girin",
     "forgotPassword": "Şifremi Unuttum",
+    "password_numeric": "Şifre sadece rakamlardan oluşmalıdır",
     "loginError": "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.",
     "theme": {
       "toggle": "Temayı Değiştir",
@@ -94,6 +105,41 @@
     }
   },
   "settings": {
+    "users": {
+      "actions": "Eylemler",
+      "title": "Kullanıcılar",
+      "subtitle": "Kullanıcıları yönetin",
+      "add_user_title": "Yeni Kullanıcı Ekle",
+      "edit_user_title": "Kullanıcı Düzenle",
+      "create": "Oluştur",
+      "admin": "Yönetici",
+      "waiter": "Garson",
+      "add_user": "Kullanıcı Ekle",
+      "edit_user": "Kullanıcı Düzenle",
+      "delete_user": "Kullanıcı Sil",
+      "name": "Ad",
+      "surname": "Soyad",
+      "username": "Kullanıcı Adı",
+      "password": "Şifre",
+      "pin": "Pin",
+      "placeholders": {
+        "username": "Kullanıcı adınızı girin",
+        "pin": "Pin numarasını girin"
+      },
+      "validation": {
+        "username_min": "Kullanıcı adı en az 3 karakter uzunluğunda olmalıdır.",
+        "username_alphanum": "Kullanıcı adı alfanumerik olmalıdır.",
+        "pin_numeric": "Pin numarası sadece rakamlardan ve 4 haneli olmalıdır."
+      },
+      "role": "Rol",
+      "confirm": "Onayla",
+      "cancel": "İptal",
+      "delete": "Sil",
+      "edit": "Düzenle",
+      "add": "Ekle",
+      "search": "Ara...",
+      "search_placeholder": "Kullanıcı ara..."
+    },
     "sections": {
       "user_management": "Kullanıcı Yönetimi",
       "user_management_desc": "Personel ve yetki yönetimi",
@@ -104,8 +150,13 @@
       "category_management": "Kategori Yönetimi",
       "category_management_desc": "Ürün kategorilerini düzenleyin",
       "expense_management": "Gider Yönetimi",
-      "expense_management_desc": "İşletme giderlerini takip edin"
+      "expense_management_desc": "İşletme giderlerini takip edin",
+      "profile": "Profil Bilgileri",
+      "profile_desc": "Ad, soyad ve iletişim bilgileri"
     },
+    "business_management": "İşletme Yönetimi",
+    "account_system": "Hesap & Sistem",
+    "subtitle": "Sistem ve hesap ayarlarınızı yönetin",
     "tables": {
       "title": "Masa Yönetimi",
       "add_table": "Masa Ekle",
@@ -119,7 +170,9 @@
       "delete_success": "Masa silindi",
       "create_success": "Masa oluşturuldu",
       "update_success": "Masa güncellendi",
-      "enter_table_name": "Masa adı giriniz (Örn: Bahçe-12)"
+      "enter_table_name": "Masa adı giriniz (Örn: Bahçe-12)",
+      "desc": "Masa düzenini ve durumlarını yönetin",
+      "empty_state": "Henüz hiç masa oluşturulmamış."
     },
     "categories": {
       "title": "Kategori Yönetimi",
@@ -154,7 +207,40 @@
       "confirm_update": "Ürün bilgilerini güncellemek istediğinize emin misiniz?",
       "delete_success": "Ürün silindi",
       "create_success": "Ürün oluşturuldu",
-      "update_success": "Ürün güncellendi"
+      "update_success": "Ürün güncellendi",
+      "image": "Fotğraf"
+    },
+    "expenses": {
+      "title": "Gider Yönetimi",
+      "desc": "İşletme giderlerini takip edin ve yönetin",
+      "add_expense": "Yeni Gider",
+      "edit_expense": "Gider Düzenle",
+      "search_placeholder": "Gider ara...",
+      "empty_state": "Henüz gider kaydı bulunmuyor.",
+      "confirm_delete": "Bu gider kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      "confirm_delete_title": "Gideri Sil",
+      "delete_success": "Gider silindi",
+      "create_success": "Gider oluşturuldu",
+      "update_success": "Gider güncellendi",
+      "amount": "Tutar",
+      "description": "Açıklama",
+      "description_placeholder": "Örn: Bulaşık Deterjanı",
+      "category": "Kategori",
+      "categories": {
+        "market": "Market",
+        "bill": "Fatura",
+        "maintenance": "Bakım/Onarım",
+        "salary": "Personel/Maaş",
+        "other": "Diğer"
+      },
+      "payment_method": "Ödeme Yöntemi",
+      "cash": "Nakit",
+      "credit_card": "Kredi Kartı",
+      "save_expense": "Gider Kaydet",
+      "saving": "Kaydediliyor...",
+      "update": "Güncelle",
+      "add_subtitle": "Kasadan çıkış yap",
+      "edit_subtitle": "Mevcut gideri güncelle"
     }
   },
   "reports": {
@@ -195,12 +281,32 @@
     "no_reports_history": "Henüz kaydedilmiş rapor bulunmuyor.",
     "period_date": "Dönem / Tarih",
     "active": "Aktif",
-    "refresh": "Yenile"
+    "refresh": "Yenile",
+    "stat_total_sales": "Toplam Satış",
+    "stat_cash_pos": "Nakit / POS",
+    "stat_total_expenses": "Toplam Gider",
+    "stat_net_profit": "Net Kar",
+    "tab_orders": "Sipariş Geçmişi",
+    "tab_expenses": "Giderler",
+    "payment_cash": "Nakit",
+    "payment_credit": "Kredi Kartı",
+    "loading_error": "Veriler yüklenirken bir hata oluştu"
+  },
+  "day": {
+    "system_closed": "Sistem Kapalı",
+    "contact_manager": "Lütfen yöneticinizle iletişime geçin. Gün henüz başlatılmadı.",
+    "start_day_button": "Günü Başlat",
+    "start_day_message": "Günü başlatmak için aşağıdaki butona tıklayın.",
+    "why_start_day_title": "Neden Günü Başlatmalıyım?",
+    "why_start_day_desc": "Sipariş alabilmek ve gün sonu raporlarının doğru oluşturulabilmesi için çalışma dönemini başlatmanız gerekmektedir."
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
     "network": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
     "title": "Beklenmeyen bir hata oluştu",
-    "contactSupport": "Lütfen sayfayı yenileyin veya destek ekibiyle iletişime geçin."
+    "contactSupport": "Lütfen sayfayı yenileyin veya destek ekibiyle iletişime geçin.",
+    "unauthorized_title": "Yetkisiz Erişim",
+    "unauthorized_desc": "Bu sayfayı görüntülemek için gerekli yetkiye sahip değilsiniz.",
+    "redirecting_in": "{{seconds}} saniye içinde yönlendirileceksiniz..."
   }
 }

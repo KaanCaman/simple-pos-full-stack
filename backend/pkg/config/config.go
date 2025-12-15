@@ -7,11 +7,13 @@ import (
 )
 
 type Config struct {
-	AppPort     string
-	DBPath      string
-	LogFilePath string
-	Environment string
-	JWTSecret   string
+	AppPort       string
+	DBPath        string
+	LogFilePath   string
+	Environment   string
+	JWTSecret     string
+	SeedAdminName string
+	SeedAdminPin  string
 }
 
 // LoadConfig loads configuration from environment variables
@@ -21,11 +23,13 @@ func LoadConfig() *Config {
 	_ = godotenv.Load()
 
 	return &Config{
-		AppPort:     getEnv("APP_PORT", "3000"),
-		DBPath:      getEnv("DB_PATH", "tostcu.db"),
-		LogFilePath: getEnv("LOG_FILE_PATH", "./logs/tostcu-pos.log"),
-		Environment: getEnv("APP_ENV", "development"),
-		JWTSecret:   getEnv("JWT_SECRET", "default-secret-do-not-use-in-prod"),
+		AppPort:       getEnv("APP_PORT", "3000"),
+		DBPath:        getEnv("DB_PATH", "tostcu.db"),
+		LogFilePath:   getEnv("LOG_FILE_PATH", "./logs/tostcu-pos.log"),
+		Environment:   getEnv("APP_ENV", "development"),
+		JWTSecret:     getEnv("JWT_SECRET", "default-secret-do-not-use-in-prod"),
+		SeedAdminName: getEnv("SEED_ADMIN_NAME", ""),
+		SeedAdminPin:  getEnv("SEED_ADMIN_PIN", ""),
 	}
 }
 

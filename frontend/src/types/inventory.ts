@@ -22,7 +22,7 @@ export interface Product extends BaseEntity {
   name: string;
   description: string;
   price: number; // Kuruş cinsinden (örn: 1500 = 15.00 TL)
-  image_url: string;
+  image_url?: string;
   is_available: boolean;
   sort_order: number;
 }
@@ -32,6 +32,7 @@ export interface CreateProductRequest {
   name: string;
   description: string;
   price: number;
+  image_url?: string;
 }
 
 export interface UpdateProductRequest {
@@ -39,4 +40,5 @@ export interface UpdateProductRequest {
   name?: string;
   price?: number;
   description?: string;
+  image_url?: string;
 }

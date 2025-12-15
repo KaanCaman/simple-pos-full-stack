@@ -120,7 +120,6 @@ export const OrderSummary = observer(
               <span>
                 {t("pos.vat_rate", {
                   rate: AppConstants.TAX_RATE * 100,
-                  defaultValue: `KDV (%${AppConstants.TAX_RATE * 100})`,
                 })}
               </span>
               <span>₺{tax.toFixed(2)}</span>
@@ -137,18 +136,14 @@ export const OrderSummary = observer(
               className="flex flex-col items-center justify-center p-4 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors shadow-lg shadow-primary-500/20"
             >
               <Banknote className="h-6 w-6 mb-1" />
-              <span className="font-bold">
-                {t("pos.pay_cash", "NAKİT ÖDE")}
-              </span>
+              <span className="font-bold">{t("pos.pay_cash_hint")}</span>
             </button>
             <button
               onClick={() => onCloseOrder("pos")}
               className="flex flex-col items-center justify-center p-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-colors dark:bg-black dark:border dark:border-gray-800"
             >
               <CreditCard className="h-6 w-6 mb-1" />
-              <span className="font-bold">
-                {t("pos.pay_credit", "KART (POS)")}
-              </span>
+              <span className="font-bold">{t("pos.pay_credit_hint")}</span>
             </button>
           </div>
         </div>

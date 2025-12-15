@@ -21,8 +21,13 @@ export const DayGuard = observer(
     // And avoid infinite redirect if we are already on start-day.
 
     if (authStore.isAuthenticated && !authStore.isDayOpen) {
-      // Save the location they were trying to access? Not strictly needed for this simple logic.
-      return <Navigate to="/start-day" state={{ from: location }} replace />;
+      if (authStore.user?.role === "admin") {
+        return <Navigate to="/start-day" state={{ from: location }} replace />;
+      } else {
+        return (
+          <Navigate to="/system-closed" state={{ from: location }} replace />
+        );
+      }
     }
 
     // If day is open but user tries to go to start-day, redirect to dashboard

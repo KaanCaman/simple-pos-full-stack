@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { X, CreditCard, Banknote, Receipt } from "lucide-react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores/rootStore";
@@ -12,6 +13,7 @@ interface ExpenseModalProps {
 
 export const ExpenseModal = observer(
   ({ isOpen, onClose, expenseToEdit }: ExpenseModalProps) => {
+    const { t } = useTranslation();
     const { expenseStore } = useStore();
     const [lira, setLira] = useState("");
     const [kurus, setKurus] = useState("");
@@ -91,12 +93,14 @@ export const ExpenseModal = observer(
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {expenseToEdit ? "Gider Düzenle" : "Gider Ekle"}
+                  {expenseToEdit
+                    ? t("settings.expenses.edit_expense")
+                    : t("settings.expenses.add_expense")}
                 </h2>
                 <p className="text-xs text-gray-500">
                   {expenseToEdit
-                    ? "Mevcut gideri güncelle"
-                    : "Kasadan çıkış yap"}
+                    ? t("settings.expenses.edit_subtitle")
+                    : t("settings.expenses.add_subtitle")}
                 </p>
               </div>
             </div>
@@ -112,7 +116,7 @@ export const ExpenseModal = observer(
             {/* Amount Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Tutar
+                {t("settings.expenses.amount")}
               </label>
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
@@ -123,7 +127,7 @@ export const ExpenseModal = observer(
                     type="number"
                     value={lira}
                     onChange={(e) => setLira(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-right"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-right placeholder-gray-400 dark:placeholder-gray-500"
                     placeholder="0"
                     autoFocus
                     min="0"
@@ -141,7 +145,7 @@ export const ExpenseModal = observer(
                         setKurus(e.target.value);
                       }
                     }}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-center"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-red-500 text-lg font-bold text-gray-900 dark:text-white text-center placeholder-gray-400 dark:placeholder-gray-500"
                     placeholder="00"
                     min="0"
                     max="99"
@@ -155,32 +159,42 @@ export const ExpenseModal = observer(
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Açıklama
+                  {t("settings.expenses.description")}
                 </label>
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Örn: Bulaşık Deterjanı"
+                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  placeholder={t("settings.expenses.description_placeholder")}
                   disabled={expenseStore.isLoading}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Kategori
+                  {t("settings.expenses.category")}
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white"
                   disabled={expenseStore.isLoading}
                 >
-                  <option value="market">Market</option>
-                  <option value="bill">Fatura</option>
-                  <option value="maintenance">Bakım/Onarım</option>
-                  <option value="salary">Personel/Maaş</option>
-                  <option value="other">Diğer</option>
+                  <option value="market">
+                    {t("settings.expenses.categories.market")}
+                  </option>
+                  <option value="bill">
+                    {t("settings.expenses.categories.bill")}
+                  </option>
+                  <option value="maintenance">
+                    {t("settings.expenses.categories.maintenance")}
+                  </option>
+                  <option value="salary">
+                    {t("settings.expenses.categories.salary")}
+                  </option>
+                  <option value="other">
+                    {t("settings.expenses.categories.other")}
+                  </option>
                 </select>
               </div>
             </div>
@@ -198,7 +212,9 @@ export const ExpenseModal = observer(
                 }`}
               >
                 <Banknote className="h-6 w-6" />
-                <span className="text-sm font-bold">Nakit</span>
+                <span className="text-sm font-bold">
+                  {t("settings.expenses.cash")}
+                </span>
               </button>
               <button
                 type="button"
@@ -211,7 +227,9 @@ export const ExpenseModal = observer(
                 }`}
               >
                 <CreditCard className="h-6 w-6" />
-                <span className="text-sm font-bold">Kredi Kartı</span>
+                <span className="text-sm font-bold">
+                  {t("settings.expenses.credit_card")}
+                </span>
               </button>
             </div>
 
@@ -221,10 +239,10 @@ export const ExpenseModal = observer(
               className="w-full py-4 bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-xl font-bold text-lg transition-colors shadow-xl disabled:opacity-50"
             >
               {expenseStore.isLoading
-                ? "Kaydediliyor..."
+                ? t("settings.expenses.saving")
                 : expenseToEdit
-                ? "Güncelle"
-                : "Gider Kaydet"}
+                ? t("settings.expenses.update")
+                : t("settings.expenses.save_expense")}
             </button>
           </form>
         </div>

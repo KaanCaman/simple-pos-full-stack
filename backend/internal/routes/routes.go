@@ -35,6 +35,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	userService := services.NewUserService(userRepo)
 	managementService := services.NewManagementService(workPeriodRepo, orderRepo, db)
 	tableService := services.NewTableService(tableRepo)
+	uploadService := services.NewUploadService()
 
 	// 6. Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService, workPeriodRepo)
@@ -46,13 +47,14 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	userHandler := handlers.NewUserHandler(userService)
 	managementHandler := handlers.NewManagementHandler(managementService)
 	tableHandler := handlers.NewTableHandler(tableService)
+	uploadHandler := handlers.NewUploadHandler(uploadService)
 
 	// 7. Route Groups
 	api := app.Group("/api/v1") // /api/v1
 
 	// Health Check
 	app.Get("/health", func(c *fiber.Ctx) error {
-		return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Tostcu POS Backend is running!", nil)
+		return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Simple POS Backend is running!", nil)
 	})
 
 	// Public Routes
@@ -68,6 +70,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 
 	// Tables (Read-Only Public/Protected) - Waiters need to see tables.
 	protected.Get("/tables", tableHandler.ListTables)
+
+	// System Status (Shared)
+	protected.Get("/management/status", managementHandler.GetSystemStatus)
 
 	// Orders
 	protected.Post("/orders", orderHandler.Create)
@@ -104,6 +109,9 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	admin.Put("/products/:id", productHandler.Update)
 	admin.Delete("/products/:id", productHandler.Delete)
 
+	// Upload Management (Admin)
+	admin.Post("/uploads/product-image", uploadHandler.UploadProductImage)
+
 	// Table Management (Admin)
 	admin.Post("/tables", tableHandler.CreateTable)
 	admin.Put("/tables/:id", tableHandler.UpdateTable)
@@ -113,7 +121,6 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	management := admin.Group("/management", middleware.RateLimiter(5, time.Minute))
 	management.Post("/start-day", managementHandler.StartDay)
 	management.Post("/end-day", managementHandler.EndDay)
-	management.Get("/status", managementHandler.GetSystemStatus)
 
 	// Analytics Routes (Admin)
 	admin.Get("/analytics/daily", analyticsHandler.GetDailyReport)

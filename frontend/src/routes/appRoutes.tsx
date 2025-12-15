@@ -6,7 +6,6 @@ import { ProtectedRoute } from "../features/auth/components/ProtectedRoute";
 import { PublicRoute } from "../features/auth/components/PublicRoute";
 import { MainLayout } from "../layouts/MainLayout";
 import { InactivityTracker } from "../components/InactivityTracker";
-import { DashboardPage } from "../features/dashboard/components/DashboardPage";
 import { OrderPage } from "../features/pos/components/OrderPage";
 import { POSPage } from "../features/pos/components/POSPage";
 import { HistoryPage } from "../features/reports/components/HistoryPage";
@@ -15,6 +14,9 @@ import { ReportHistoryPage } from "../features/reports/components/ReportHistoryP
 import { SettingsPage } from "../features/settings/components/SettingsPage";
 import { StartDayPage } from "../features/dashboard/components/StartDayPage";
 import { DayGuard } from "../components/DayGuard";
+import { RoleGuard } from "../features/auth/components/RoleGuard";
+import { RoleBasedHome } from "../components/RoleBasedHome";
+import { SystemClosedPage } from "../features/dashboard/components/SystemClosedPage";
 
 // Root layout component that includes global providers/components.
 // Küresel sağlayıcıları/bileşenleri içeren kök düzen bileşeni.
@@ -54,43 +56,58 @@ export const appRoutes = createBrowserRouter([
               </DayGuard>
             ),
             children: [
+              // Admin Only Routes
+              {
+                element: <RoleGuard allowedRoles={["admin"]} />,
+                children: [
+                  {
+                    path: "history",
+                    element: <HistoryPage />,
+                  },
+                  {
+                    path: "reports",
+                    element: <DailyReportPage />,
+                  },
+                  {
+                    path: "reports/history",
+                    element: <ReportHistoryPage />,
+                  },
+                  {
+                    path: "reports/:date",
+                    element: <DailyReportPage />,
+                  },
+                  {
+                    path: "settings",
+                    element: <SettingsPage />,
+                  },
+                ],
+              },
               {
                 index: true,
-                element: <DashboardPage />,
+                element: <RoleBasedHome />,
+              },
+              // Shared Routes (Waiter + Admin)
+              {
+                path: "pos",
+                element: <POSPage />,
               },
               {
                 path: "order/:id",
                 element: <OrderPage />,
               },
-              {
-                path: "history",
-                element: <HistoryPage />,
-              },
-              {
-                path: "reports",
-                element: <DailyReportPage />,
-              },
-              {
-                path: "reports/history",
-                element: <ReportHistoryPage />,
-              },
-              {
-                path: "reports/:date",
-                element: <DailyReportPage />,
-              },
-              {
-                path: "settings",
-                element: <SettingsPage />,
-              },
-              {
-                path: "pos",
-                element: <POSPage />,
-              },
             ],
           },
           {
             path: "start-day",
-            element: <StartDayPage />,
+            element: (
+              <RoleGuard allowedRoles={["admin"]}>
+                <StartDayPage />
+              </RoleGuard>
+            ),
+          },
+          {
+            path: "system-closed",
+            element: <SystemClosedPage />,
           },
         ],
       },
