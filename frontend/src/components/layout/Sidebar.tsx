@@ -10,6 +10,7 @@ import {
   UtensilsCrossed,
   FileText,
   X,
+  LogOut,
 } from "lucide-react";
 import { AppConstants } from "../../constants/app";
 
@@ -154,6 +155,17 @@ export const Sidebar = observer(({ isOpen, onClose }: SidebarProps) => {
             );
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1A1D1F]">
+          <button
+            onClick={() => store.authStore.logout()}
+            className="flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>{t("auth.logout")}</span>
+          </button>
+        </div>
       </aside>
     </>
   );

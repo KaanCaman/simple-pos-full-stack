@@ -16,7 +16,7 @@ class AuthService extends BaseService {
   }
 
   public async me() {
-    return this.get<ApiResponse<any>>("/auth/me");
+    return this.get<ApiResponse<any>>(AppEndPoints.API_V1.ME);
   }
 }
 
