@@ -224,3 +224,30 @@ func (h *OrderHandler) Cancel(c *fiber.Ctx) error {
 
 	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Order cancelled successfully", nil)
 }
+
+type ApplyDiscountRequest struct {
+	Type   string `json:"type" validate:"required,oneof=AMOUNT PERCENTAGE NONE"`
+	Value  int64  `json:"value" validate:"min=0"`
+	Reason string `json:"reason" validate:"required,min=3"`
+}
+
+// ApplyDiscount handles POST /orders/:id/discount
+// Siparişe indirim uygular
+func (h *OrderHandler) ApplyDiscount(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid Order ID")
+	}
+
+	var req ApplyDiscountRequest
+	if err := middleware.ValidateBody(c, &req); err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, err.Error())
+	}
+
+	order, err := h.service.ApplyDiscount(uint(id), req.Type, req.Value, req.Reason)
+	if err != nil {
+		return utils.BadRequestError(c, utils.CodeInvalidInput, err.Error())
+	}
+
+	return utils.Success(c, fiber.StatusOK, utils.CodeOK, "Discount applied successfully", order)
+}

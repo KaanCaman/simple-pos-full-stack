@@ -317,7 +317,30 @@ export const DailyReportPage = observer(() => {
                                 • 👤 {order.waiter.name}
                               </span>
                             )}
+                            {order.table_name && (
+                              <span className="ml-2 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                🍽️ {order.table_name}
+                              </span>
+                            )}
                           </p>
+                          {order.discount_amount > 0 && (
+                            <div className="mt-1 flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                              <span className="font-bold">İndirim:</span>
+                              <span>
+                                -{formatCurrency(order.discount_amount / 100)}
+                              </span>
+                              <span className="bg-green-100 dark:bg-green-900/30 px-1.5 rounded">
+                                {order.discount_type === "PERCENTAGE"
+                                  ? `%${order.discount_value}`
+                                  : "Tutar"}
+                              </span>
+                              {order.discount_reason && (
+                                <span className="text-gray-400">
+                                  ({order.discount_reason})
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

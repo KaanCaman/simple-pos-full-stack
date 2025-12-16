@@ -256,6 +256,31 @@ export class OrderStore {
     }
   }
 
+  async applyDiscount(type: string, value: number, reason: string) {
+    if (!this.currentOrder) return;
+    this.isLoading = true;
+    try {
+      const response = await orderService.applyDiscount(this.currentOrder.id, {
+        type,
+        value,
+        reason,
+      });
+
+      if (response.data.success && response.data.data) {
+        runInAction(() => {
+          this.currentOrder = response.data.data;
+        });
+        toast.success(i18n.t("pos.discount_applied"));
+      }
+    } catch (error) {
+      toast.error(i18n.t("errors.generic"));
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
+  }
+
   async fetchTableOrders(tableId: number): Promise<Order[]> {
     this.isLoading = true;
     try {

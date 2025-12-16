@@ -18,9 +18,9 @@ export const OrderInterface = observer(({ onBack }: OrderInterfaceProps) => {
   const { t } = useTranslation();
 
   return (
-    <div className="h-[100dvh] overflow-hidden flex flex-col md:flex-row bg-gray-50 dark:bg-[#111315] relative">
+    <div className="h-full w-full overflow-hidden flex flex-col md:flex-row bg-gray-50 dark:bg-[#111315]">
       {/* Left: Menu Grid (Flex-1) */}
-      <div className="flex-1 h-full overflow-hidden pb-20 md:pb-0">
+      <div className="flex-1 h-full overflow-hidden pb-20 md:pb-0 md:mr-[400px]">
         <MenuGrid onBack={onBack} />
       </div>
 
@@ -50,7 +50,7 @@ export const OrderInterface = observer(({ onBack }: OrderInterfaceProps) => {
       </div>
 
       {/* Right: Cart (Fixed width on desktop, buried on mobile unless toggled) */}
-      <div className="hidden md:block w-[400px] h-full border-l border-gray-200 dark:border-gray-800 shadow-xl z-20 bg-white dark:bg-[#1A1D1F]">
+      <div className="hidden md:flex flex-col w-[400px] h-full border-l border-gray-200 dark:border-gray-800 shadow-xl z-20 bg-white dark:bg-[#1A1D1F] overflow-hidden fixed right-0 top-0">
         <OrderCart onBack={onBack} />
       </div>
 

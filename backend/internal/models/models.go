@@ -86,18 +86,23 @@ const (
 // Müşteri siparişi
 type Order struct {
 	BaseModel
-	OrderNumber   string      `gorm:"size:50;uniqueIndex;not null" json:"order_number"` // UUID or Generated
-	WorkPeriodID  uint        `gorm:"index" json:"work_period_id"`                      // Link to WorkPeriod
-	TableID       *uint       `json:"table_id"`
-	WaiterID      *uint       `json:"waiter_id"`
-	Waiter        *User       `json:"waiter,omitempty"`
-	Status        string      `gorm:"size:20;default:'open'" json:"status" validate:"oneof=open completed cancelled"`
-	Subtotal      int64       `gorm:"default:0" json:"subtotal"` // Sum of items subtotal
-	TaxAmount     int64       `gorm:"default:0" json:"tax_amount"`
-	TotalAmount   int64       `gorm:"default:0" json:"total_amount"` // Subtotal + Tax
-	PaymentMethod string      `gorm:"size:50" json:"payment_method"`
-	CompletedAt   *time.Time  `json:"completed_at"`
-	Items         []OrderItem `json:"items,omitempty"`
+	OrderNumber    string      `gorm:"size:50;uniqueIndex;not null" json:"order_number"` // UUID or Generated
+	WorkPeriodID   uint        `gorm:"index" json:"work_period_id"`                      // Link to WorkPeriod
+	TableID        *uint       `json:"table_id"`
+	TableName      string      `gorm:"size:50" json:"table_name"` // Snapshot of table name
+	WaiterID       *uint       `json:"waiter_id"`
+	Waiter         *User       `json:"waiter,omitempty"`
+	Status         string      `gorm:"size:20;default:'open'" json:"status" validate:"oneof=open completed cancelled"`
+	Subtotal       int64       `gorm:"default:0" json:"subtotal"` // Sum of items subtotal
+	TaxAmount      int64       `gorm:"default:0" json:"tax_amount"`
+	DiscountType   string      `gorm:"size:20;default:'NONE'" json:"discount_type"` // NONE, AMOUNT, PERCENTAGE
+	DiscountValue  int64       `gorm:"default:0" json:"discount_value"`             // Input value (e.g., 10 for 10%, 5000 for 50.00)
+	DiscountAmount int64       `gorm:"default:0" json:"discount_amount"`            // Calculated amount
+	DiscountReason string      `gorm:"size:255" json:"discount_reason"`             // Reason for discount
+	TotalAmount    int64       `gorm:"default:0" json:"total_amount"`               // Subtotal - Discount + Tax
+	PaymentMethod  string      `gorm:"size:50" json:"payment_method"`
+	CompletedAt    *time.Time  `json:"completed_at"`
+	Items          []OrderItem `json:"items,omitempty"`
 }
 
 // OrderItem represents an item in an order
@@ -218,7 +223,22 @@ func (item *OrderItem) AfterSave(tx *gorm.DB) (err error) {
 	}
 
 	order.Subtotal = result.Total
-	order.TotalAmount = order.Subtotal + order.TaxAmount
+
+	// Recalculate Discount
+	if order.DiscountType == "PERCENTAGE" {
+		order.DiscountAmount = (order.Subtotal * order.DiscountValue) / 100
+	} else if order.DiscountType == "AMOUNT" {
+		// Fixed amount, but ensure it doesn't exceed subtotal
+		if order.DiscountValue > order.Subtotal {
+			order.DiscountAmount = order.Subtotal
+		} else {
+			order.DiscountAmount = order.DiscountValue
+		}
+	} else {
+		order.DiscountAmount = 0
+	}
+
+	order.TotalAmount = order.Subtotal - order.DiscountAmount + order.TaxAmount
 	// Note: Tax calculation logic might be complex (per item or global),
 	// for now we assume TaxAmount is set elsewhere or derived.
 	// If we want simply Tax = 0 or specific rule, we can add it.

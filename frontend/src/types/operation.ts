@@ -29,6 +29,11 @@ export interface Order extends BaseEntity {
   subtotal: number;
   tax_amount: number;
   total_amount: number;
+  discount_type: "AMOUNT" | "PERCENTAGE" | "NONE";
+  discount_value: number;
+  discount_amount: number;
+  discount_reason?: string;
+  table_name?: string; // Snapshot
   payment_method: PaymentMethod;
   completed_at: string | null;
   items?: OrderItem[]; // Response often includes items
