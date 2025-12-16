@@ -154,7 +154,7 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
       </div>
 
       {/* Cart Items */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
         {orderStore.currentOrder.items?.map((item) => (
           <div
             key={item.id}
