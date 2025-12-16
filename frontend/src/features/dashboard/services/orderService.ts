@@ -70,6 +70,17 @@ class OrderService extends BaseService {
     );
   }
 
+  // Apply Discount (POST /orders/:id/discount)
+  public async applyDiscount(
+    orderId: number,
+    data: { type: string; value: number; reason: string }
+  ) {
+    return this.post<ApiResponse<Order>>(
+      `${AppEndPoints.API_V1.ORDERS}/${orderId}/discount`,
+      data
+    );
+  }
+
   // Get orders with date filter
   // Get orders with date filter
   public async getOrders(startDate?: string, endDate?: string, scope?: string) {

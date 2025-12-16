@@ -7,7 +7,7 @@ import { useStore } from "../../../../stores/rootStore";
 import { api } from "../../../../api/axios";
 import type { Product } from "../../../../types/inventory";
 import { useRef } from "react";
-import { AppConstants, AppEndPoints } from "../../../../constants/app";
+import { AppConstants } from "../../../../constants/app";
 
 export const ProductManagement = observer(() => {
   const { t } = useTranslation();

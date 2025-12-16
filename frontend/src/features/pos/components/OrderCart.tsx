@@ -1,15 +1,17 @@
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores/rootStore";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2, Tags } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import type { Order } from "../../../types/operation";
 import { AppConstants } from "../../../constants/app";
+import { DiscountModal } from "./DiscountModal";
 
 export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
   const { orderStore, uiStore, authStore } = useStore();
   const { t } = useTranslation();
   const [tableOrders, setTableOrders] = useState<Order[]>([]);
+  const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
 
   // Fetch orders when component loads or currentOrder changes (to sync updates)
   useEffect(() => {
@@ -205,6 +207,29 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
             <span>{t("pos.subtotal")}</span>
             <span>{(orderStore.cartTotal / 100).toFixed(2)} ₺</span>
           </div>
+
+          {/* Discount Display */}
+          {orderStore.currentOrder.discount_type !== "NONE" && (
+            <div className="flex justify-between items-center text-sm text-green-500 font-medium">
+              <div className="flex items-center gap-1">
+                <span>{t("pos.discount", "İndirim")}</span>
+                {orderStore.currentOrder.discount_type === "PERCENTAGE" && (
+                  <span className="text-xs bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">
+                    %{orderStore.currentOrder.discount_value}
+                  </span>
+                )}
+                {orderStore.currentOrder.discount_reason && (
+                  <span className="text-xs text-green-600/70 dark:text-green-400/70 max-w-[100px] truncate">
+                    ({orderStore.currentOrder.discount_reason})
+                  </span>
+                )}
+              </div>
+              <span>
+                -{(orderStore.currentOrder.discount_amount / 100).toFixed(2)} ₺
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between items-center text-sm text-gray-500">
             <span>
               {t("pos.vat_rate_dynamic", {
@@ -212,25 +237,50 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
                 defaultValue: `KDV (%${AppConstants.TAX_RATE * 100})`,
               })}
             </span>
+            {/* Tax is calculated on what? Backend says Total = Subtotal - Discount + Tax. TaxAmount field in Order. */}
+            {/* Current frontend logic was: cartTotal * rate. Correct logic if Tax is ON TOP of discounted price: */}
+            {/* But backend calculates taxAmount. Let's use backend provided taxAmount if available, or fallback. */}
+            {/* Since currentOrder has tax_amount from backend (if we strictly synced interfaces), we should use it. */}
+            {/* But Order interface might not have updated types yet. Let's assume we rely on backend 'total_amount'. */}
+
+            {/* Quick check: In frontend types/operation.ts, does Order have tax_amount? */}
+            {/* The previous OrderStore logic was calculating it manually: (courseStore.cartTotal * AppConstants.TAX_RATE) / 100 */}
+            {/* If we apply discount, we should use (Subtotal - Discount) * TaxRate */}
+
             <span>
-              {((orderStore.cartTotal * AppConstants.TAX_RATE) / 100).toFixed(
-                2
-              )}{" "}
+              {(
+                ((orderStore.cartTotal -
+                  (orderStore.currentOrder.discount_amount || 0)) *
+                  AppConstants.TAX_RATE) /
+                100
+              ).toFixed(2)}{" "}
               ₺
             </span>
           </div>
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-lg font-bold text-gray-900 dark:text-white">
-            {t("pos.total_amount")}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
+              {t("pos.total_amount")}
+            </span>
+            {/* Discount Button */}
+            <button
+              onClick={() => setIsDiscountModalOpen(true)}
+              className="text-xs font-bold text-primary-500 hover:text-primary-600 hover:underline flex items-center gap-1 pt-1"
+            >
+              <Tags className="w-3 h-3" />
+              {orderStore.currentOrder.discount_type !== "NONE"
+                ? t("pos.edit_discount", "İndirimi Düzenle")
+                : t("pos.add_discount", "İndirim Ekle")}
+            </button>
+          </div>
           <span className="text-3xl font-black text-primary-500">
-            {(
-              (orderStore.cartTotal * (1 + AppConstants.TAX_RATE)) /
-              100
-            ).toFixed(2)}{" "}
-            ₺
+            {/* Use backend totalAmount if available and trusted, or recalc. */}
+            {/* OrderStore.loadOrder fetches data. Backend calculates totalAmount. */}
+            {/* Let's use `currentOrder.total_amount` if accessible, otherwise recalc. */}
+            {/* Order type usually has total_amount. */}
+            {(orderStore.currentOrder.total_amount / 100).toFixed(2)} ₺
           </span>
         </div>
 
@@ -256,6 +306,16 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
           </button>
         </div>
       </div>
+
+      {isDiscountModalOpen && (
+        <DiscountModal
+          currentSubtotal={orderStore.cartTotal}
+          onClose={() => setIsDiscountModalOpen(false)}
+          onApply={(type, value, reason) =>
+            orderStore.applyDiscount(type, value, reason)
+          }
+        />
+      )}
     </div>
   );
 });

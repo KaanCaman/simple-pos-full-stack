@@ -81,6 +81,7 @@ func RegisterRoutes(app *fiber.App, db *gorm.DB, cfg *config.Config) {
 	protected.Put("/orders/:id/items/:itemId", orderHandler.UpdateItem)
 	protected.Delete("/orders/:id/items/:itemId", orderHandler.RemoveItem)
 	protected.Delete("/orders/:id", orderHandler.Cancel)
+	protected.Post("/orders/:id/discount", orderHandler.ApplyDiscount) // Discount for Waiters/Admins
 	protected.Get("/orders/:id", orderHandler.GetOrder)
 	protected.Get("/orders", orderHandler.GetOrders)
 	protected.Get("/orders/table/:id", orderHandler.GetOrdersByTable)

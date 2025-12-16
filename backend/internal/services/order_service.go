@@ -249,31 +249,103 @@ func (s *OrderService) GetOrders(startDate, endDate time.Time, scope string) ([]
 	return s.orderRepo.FindByWorkPeriodIDs(ids)
 }
 
+// ApplyDiscount applies a discount to the order and saves it
+// Siparişe indirim uygular ve kaydeder
+func (s *OrderService) ApplyDiscount(orderID uint, discountType string, value int64, reason string) (*models.Order, error) {
+	// 1. Get Order
+	order, err := s.orderRepo.FindByID(orderID)
+	if err != nil {
+		return nil, err
+	}
+	if order.Status != "OPEN" {
+		return nil, errors.New("cannot apply discount to closed order")
+	}
+
+	// 2. Validate Inputs
+	if discountType != "AMOUNT" && discountType != "PERCENTAGE" && discountType != "NONE" {
+		return nil, errors.New("invalid discount type")
+	}
+	if value < 0 {
+		return nil, errors.New("discount value cannot be negative")
+	}
+	if reason == "" && discountType != "NONE" {
+		return nil, errors.New("discount reason is required")
+	}
+
+	// 3. Update Order Fields
+	// The calculation logic is now in the Order.BeforeSave/AfterSave hooks (or in OrderItem hooks for Propagating)
+	// But since we are updating Order directly, we need to ensuring TotalAmount is recalculated.
+	// We added logic in OrderItem.AfterSave to update Order.TotalAmount.
+	// But here we are updating the Order itself. So we should recalculate here or add a BeforeSave hook on Order?
+	// The OrderItem.AfterSave hook recalculates everything.
+	// Let's manually trigger the recalculation logic here to be safe and explicit, or rely on a new method.
+	// For now, let's replicate the calculation logic or ensure the Order hooks handle it.
+	// We didn't add a BeforeSave hook on Order in models.go, only AfterSave on OrderItem.
+	// So we must manually recalculate here.
+
+	order.DiscountType = discountType
+	order.DiscountValue = value
+	order.DiscountReason = reason
+
+	// Subtotal should be correct already.
+	// // Recalculate DiscountAmount
+	switch order.DiscountType {
+	case "PERCENTAGE":
+		order.DiscountAmount = (order.Subtotal * order.DiscountValue) / 100
+	case "AMOUNT":
+		if order.DiscountValue > order.Subtotal {
+			order.DiscountAmount = order.Subtotal
+		} else {
+			order.DiscountAmount = order.DiscountValue
+		}
+	default:
+		order.DiscountAmount = 0
+	}
+	// if order.DiscountType == "PERCENTAGE" {
+	// 	order.DiscountAmount = (order.Subtotal * order.DiscountValue) / 100
+	// } else if order.DiscountType == "AMOUNT" {
+	// 	if order.DiscountValue > order.Subtotal {
+	// 		order.DiscountAmount = order.Subtotal
+	// 	} else {
+	// 		order.DiscountAmount = order.DiscountValue
+	// 	}
+	// } else {
+	// 	order.DiscountAmount = 0
+	// }
+
+	order.TotalAmount = order.Subtotal - order.DiscountAmount + order.TaxAmount
+
+	if err := s.orderRepo.Update(order); err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
 // CloseOrder completes payment and records revenue logic (ACID)
 // Siparişi tamamlar, ödemeyi alır ve geliri kaydeder (ACID)
 func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 	// Execute within a transaction
 	// İşlem içinde çalıştır
 	return s.orderRepo.WithTransaction(func(tx *gorm.DB) error {
-		// 1. Fetch Order (Need to fetch using TX ideally, but Repo abstract FindByID usually uses base DB)
-		// NOTE: In strict repo patterns, we'd pass TX to FindByID.
-		// For now, we will use the TX-aware helpers or rely on optimistic locking if needed.
-		// BETTER APPROACH: Since we have *gorm.DB here, we can query directly if allowed, OR
-		// we just fetch purely.
-		// Actually, to update effectively in TX, we should fetch inside TX or just Save inside TX.
-		// Let's Fetch using the main repo (read) then Save using TX.
-
 		var order models.Order
 		if err := tx.First(&order, orderID).Error; err != nil {
 			return errors.New("order not found")
 		}
 
-		// 2. Validate Status
 		if order.Status == "COMPLETED" {
 			return errors.New("order is already completed")
 		}
 
-		// 3. Update Order
+		// Snapshot TableName logic
+		if order.TableID != nil {
+			var table models.Table
+			if err := tx.First(&table, *order.TableID).Error; err == nil {
+				order.TableName = table.Name // Snapshot the name
+			}
+		}
+
+		// Update Order
 		now := time.Now()
 		order.Status = "COMPLETED"
 		order.PaymentMethod = paymentMethod
@@ -283,7 +355,7 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 			return err
 		}
 
-		// 4. Create Transaction Record
+		// Create Transaction Record
 		transaction := &models.Transaction{
 			Type:            "INCOME",
 			Category:        "Sales",
@@ -291,7 +363,7 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 			Amount:          order.TotalAmount,
 			Description:     "Order #" + order.OrderNumber,
 			OrderID:         &order.ID,
-			WorkPeriodID:    order.WorkPeriodID, // Link transaction to the same period as order
+			WorkPeriodID:    order.WorkPeriodID,
 			TransactionDate: now,
 		}
 
@@ -299,24 +371,8 @@ func (s *OrderService) CloseOrder(orderID uint, paymentMethod string) error {
 			return err
 		}
 
-		// Update Table Status when order is closed (Need to check if any other open orders exist)
-		// Sipariş kapatıldığında masa durumunu güncelle (Başka açık sipariş olup olmadığını kontrol et)
+		// Update Table Status
 		if order.TableID != nil {
-			// Find OPEN orders for this table, using the TX to be safe (though Repo uses separate DB instance usually,
-			// using repository method directly is cleaner if transaction context is not strictly required for read).
-			// Ideally we use tx to count.
-			// WORKAROUND: We assume strict consistency isn't violated by a slight race here for table status in MVP.
-			// Correct way: Check count of OPEN orders where ID != closedOrderID.
-			// Since we just marked this one COMPLETED in TX, FindByTableID("OPEN") should return remaining.
-
-			// Note: order_repo.FindByTableID uses s.orderRepo.db which is outside this TX.
-			// So it might still see the old status if isolation level is low, OR if we haven't committed.
-			// But we updated `order` using `tx.Save`.
-			// So `tx` knows it is COMPLETED.
-			// But `FindByTableID` uses `r.db`.
-			// We should probably just assume if this was the last one, clear table.
-
-			// Better: Execute query using TX.
 			var count int64
 			tx.Model(&models.Order{}).Where("table_id = ? AND status = ?", *order.TableID, "OPEN").Count(&count)
 
