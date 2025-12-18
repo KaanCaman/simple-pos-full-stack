@@ -17,7 +17,8 @@ func NewTableHandler(service *services.TableService) *TableHandler {
 }
 
 type CreateTableRequest struct {
-	Name string `json:"name" validate:"required"`
+	Name    string `json:"name" validate:"required"`
+	Section string `json:"section"` // Optional, default salon
 }
 
 // CreateTable handles table creation
@@ -27,7 +28,7 @@ func (h *TableHandler) CreateTable(c *fiber.Ctx) error {
 		return err
 	}
 
-	table, err := h.service.CreateTable(req.Name)
+	table, err := h.service.CreateTable(req.Name, req.Section)
 	if err != nil {
 		// Assuming uniqueness constraint might fail
 		return utils.BadRequestError(c, utils.CodeInvalidInput, "Could not create table (Name might be duplicate)")
@@ -53,12 +54,12 @@ func (h *TableHandler) UpdateTable(c *fiber.Ctx) error {
 		return utils.BadRequestError(c, utils.CodeInvalidInput, "Invalid ID")
 	}
 
-	var req CreateTableRequest // Reusing same struct as we only need Name
+	var req CreateTableRequest // Reusing same struct as we only need Name/Section
 	if err := middleware.ValidateBody(c, &req); err != nil {
 		return err
 	}
 
-	table, err := h.service.UpdateTable(uint(id), req.Name)
+	table, err := h.service.UpdateTable(uint(id), req.Name, req.Section)
 	if err != nil {
 		return utils.BadRequestError(c, utils.CodeResourceNotFound, "Could not update table")
 	}

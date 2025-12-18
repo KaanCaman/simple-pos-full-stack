@@ -42,7 +42,11 @@ export const MenuGrid = observer(({ onBack }: MenuGridProps) => {
           )}
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {orderStore.currentOrder
-              ? `Masa ${orderStore.currentOrder.table_id}`
+              ? orderStore.currentOrder.table_name ||
+                useStore().tableStore.tables.find(
+                  (t) => t.id === orderStore.currentOrder?.table_id
+                )?.name ||
+                `${orderStore.currentOrder.table_id || "Seçimi"}`
               : t("pos.menu")}
           </h2>
         </div>
@@ -94,7 +98,11 @@ export const MenuGrid = observer(({ onBack }: MenuGridProps) => {
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             {orderStore.currentOrder
-              ? `Masa ${orderStore.currentOrder.table_id || "Seçimi"}`
+              ? orderStore.currentOrder.table_name ||
+                useStore().tableStore.tables.find(
+                  (t) => t.id === orderStore.currentOrder?.table_id
+                )?.name ||
+                `Masa ${orderStore.currentOrder.table_id || "Seçimi"}`
               : t("pos.menu")}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm">

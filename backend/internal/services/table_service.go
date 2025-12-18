@@ -15,10 +15,14 @@ func NewTableService(repo repositories.TableRepository) *TableService {
 }
 
 // CreateTable creates a new table unique by name
-func (s *TableService) CreateTable(name string) (*models.Table, error) {
+func (s *TableService) CreateTable(name, section string) (*models.Table, error) {
+	if section == "" {
+		section = "salon"
+	}
 	table := &models.Table{
-		Name:   name,
-		Status: models.TableStatusAvailable,
+		Name:    name,
+		Section: section,
+		Status:  models.TableStatusAvailable,
 	}
 	if err := s.repo.Create(table); err != nil {
 		return nil, err
@@ -31,14 +35,18 @@ func (s *TableService) ListTables() ([]models.Table, error) {
 	return s.repo.FindAll()
 }
 
-// UpdateTable updates a table name
-func (s *TableService) UpdateTable(id uint, name string) (*models.Table, error) {
+// UpdateTable updates a table name and section
+func (s *TableService) UpdateTable(id uint, name, section string) (*models.Table, error) {
 	table, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	table.Name = name
+	if section != "" {
+		table.Section = section
+	}
+
 	if err := s.repo.Update(table); err != nil {
 		return nil, err
 	}
