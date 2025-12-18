@@ -50,7 +50,7 @@ export const OrderInterface = observer(({ onBack }: OrderInterfaceProps) => {
       </div>
 
       {/* Right: Cart (Fixed width on desktop, buried on mobile unless toggled) */}
-      <div className="hidden md:flex flex-col w-[400px] h-full border-l border-gray-200 dark:border-gray-800 shadow-xl z-20 bg-white dark:bg-[#1A1D1F] overflow-hidden fixed right-0 top-0">
+      <div className="hidden md:flex flex-col w-[400px] h-[calc(100vh-5rem)] border-l border-gray-200 dark:border-gray-800 shadow-xl z-20 bg-white dark:bg-[#1A1D1F] overflow-hidden fixed right-0 top-20">
         <OrderCart onBack={onBack} />
       </div>
 
