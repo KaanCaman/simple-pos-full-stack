@@ -169,7 +169,7 @@
       "expense_management_desc": "Track business expenses",
       "profile": "Profile Information",
       "profile_desc": "Name, surname and contact information",
-      "general_settings" : "General Settings",
+      "general_settings": "General Settings",
       "general_settings_desc": "Language and app preferences"
     },
     "business_management": "Business Management",
@@ -178,6 +178,7 @@
     "tables": {
       "title": "Table Management",
       "add_table": "Add Table",
+      "section": "Section",
       "edit_table": "Edit Table",
       "table_name": "Table Name",
       "occupied": "Occupied",

@@ -177,6 +177,7 @@
     "subtitle": "Sistem ve hesap ayarlarınızı yönetin",
     "tables": {
       "title": "Masa Yönetimi",
+      "section": "Bölüm",
       "add_table": "Masa Ekle",
       "edit_table": "Masa Düzenle",
       "table_name": "Masa Adı",

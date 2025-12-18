@@ -144,7 +144,11 @@ export const OrderCart = observer(({ onBack }: { onBack?: () => void }) => {
         </div>
 
         <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-          {t("pos.table")} {orderStore.currentOrder.table_id}
+          {orderStore.currentOrder.table_name ||
+            useStore().tableStore.tables.find(
+              (t) => t.id === orderStore.currentOrder?.table_id
+            )?.name ||
+            orderStore.currentOrder.table_id}
         </h2>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span>

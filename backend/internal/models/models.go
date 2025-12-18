@@ -64,6 +64,7 @@ const (
 type Table struct {
 	BaseModel
 	Name           string `gorm:"size:50;uniqueIndex;not null" json:"name" validate:"required"`
+	Section        string `gorm:"size:50;default:'salon'" json:"section"` // salon, garden, baloon
 	Status         string `gorm:"size:20;default:'available'" json:"status" validate:"oneof=available occupied reserved"`
 	CurrentOrderID *uint  `json:"current_order_id,omitempty"`
 	OrderCount     int64  `gorm:"->" json:"order_count"` // Virtual field for active order count, -> means ReadOnly

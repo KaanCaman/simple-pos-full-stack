@@ -3,10 +3,48 @@ import { useStore } from "../../../stores/rootStore";
 import { Users } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 export const TableSelection = observer(() => {
   const { tableStore, orderStore, authStore } = useStore();
   const { t } = useTranslation();
+
+  const [activeSection, setActiveSection] = useState<string>("all");
+
+  const filteredTables = tableStore.tables.filter((table) => {
+    if (activeSection === "all") return true;
+    // Default to 'salon' if section is missing/undefined
+    const section = table.section || "salon";
+    return section === activeSection;
+  });
+
+  const sections = [
+    {
+      id: "all",
+      label: t("pos.section_all", "Hepsi"),
+      icon: <span className="text-xl">🏢</span>,
+    },
+    {
+      id: "salon",
+      label: t("pos.section_salon", "Salon"),
+      icon: <span className="text-xl">🪑</span>,
+    },
+    {
+      id: "garden",
+      label: t("pos.section_garden", "Bahçe"),
+      icon: <span className="text-xl">🌳</span>,
+    },
+    {
+      id: "shops",
+      label: t("pos.section_shops", "Dükkanlar"),
+      icon: <span className="text-xl">🏪</span>,
+    },
+  ];
+
+  const getSectionLabel = (sectionId?: string) => {
+    const section = sections.find((s) => s.id === (sectionId || "salon"));
+    return section?.label || sectionId;
+  };
 
   const handleTableClick = async (table: any) => {
     if (table.status === "occupied") {
@@ -14,16 +52,9 @@ export const TableSelection = observer(() => {
       const orders = await orderStore.fetchTableOrders(table.id);
 
       if (orders.length > 0) {
-        // Load the first order (or most recent?)
-        // Backend sort usually handles this, order_repo.go sorts by ID usually or insertion.
-        // Let's pick the last one or first one?
-        // Typically "Open" orders.
+        // Load the first order
         await orderStore.loadOrder(orders[0].id);
-        // POSPage detects currentOrder and switches view automatically
       } else {
-        // Status implies occupied but no open orders found?
-        // Edge case: maybe manually reset status or create new one.
-        // Let's create new one to be safe.
         if (authStore.user) {
           await orderStore.createOrder(table.id, authStore.user.id);
         }
@@ -39,13 +70,38 @@ export const TableSelection = observer(() => {
   };
 
   return (
-    <div className="h-full p-4 sm:p-6 overflow-y-auto">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        {t("pos.table_selection")}
-      </h1>
+    <div className="h-full p-4 sm:p-6 overflow-y-auto flex flex-col">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {t("pos.table_selection")}
+        </h1>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {tableStore.tables.map((table) => (
+        {/* Section Tabs - Scrollable on mobile */}
+        <div className="w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl min-w-max">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap
+                  ${
+                    activeSection === section.id
+                      ? "bg-white dark:bg-[#1A1D1F] text-gray-900 dark:text-white shadow-sm"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }
+                `}
+              >
+                {section.icon}
+                <span>{section.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20">
+        {filteredTables.map((table) => (
           <button
             key={table.id}
             onClick={() => handleTableClick(table)}
@@ -85,10 +141,11 @@ export const TableSelection = observer(() => {
               }
             `}
             >
+              {/* Show different icon based on section maybe? For now standard Users icon */}
               <Users className="h-6 w-6" />
             </div>
 
-            <div className="w-full text-center">
+            <div className="w-full text-center flex flex-col gap-1">
               <span
                 className={`text-sm font-medium ${
                   table.status === "occupied"
@@ -99,6 +156,10 @@ export const TableSelection = observer(() => {
                 {table.status === "occupied"
                   ? `${t("pos.occupied")} (${table.order_count || 1})`
                   : t("pos.empty")}
+              </span>
+              {/* Display Section Name */}
+              <span className="text-xs text-gray-400 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full inline-block mx-auto">
+                {getSectionLabel(table.section)}
               </span>
             </div>
 
