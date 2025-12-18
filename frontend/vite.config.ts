@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
-      __API_URL__: JSON.stringify(env.VITE_API_URL || "http://localhost:3000"),
+      __API_URL__: JSON.stringify(env.VITE_API_URL ?? "http://localhost:3000"),
       __APP_NAME__: JSON.stringify(env.VITE_APP_NAME || "Simple POS"),
       __IDLE_TIMEOUT__: JSON.stringify(Number(env.VITE_IDLE_TIMEOUT) || 900000), // 15 mins
       __TAX_RATE__: JSON.stringify(Number(env.VITE_TAX_RATE) || 0),

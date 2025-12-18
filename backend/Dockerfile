@@ -1,46 +1,61 @@
-
-# Build Stage (Derleme Aşaması)
-# Use the official Go 1.24 image based on Debian (includes glibc)
-# Go 1.24'ün Debian tabanlı (glibc içeren) resmi imajını kullanıyoruz.
+# --- Build Stage (Derleme Aşaması) ---
+# Use the official Golang 1.24 image based on Debian Bookworm.
+# Debian Bookworm tabanlı resmi Golang 1.24 imajını kullan.
 FROM golang:1.24 AS builder
 
+# Set the working directory inside the container.
+# Konteyner içindeki çalışma dizinini ayarla.
 WORKDIR /app
 
-# Copy go mod and source files
-# go mod ve kaynak dosyaları kopyala
+# Copy the Go module files first to cache dependencies.
+# Bağımlılıkları önbelleğe almak için önce Go modül dosyalarını kopyala.
 COPY go.mod ./
+# Copy the source code into the container.
+# Kaynak kodunu konteyner içine kopyala.
 COPY . .
 
-# Build the application
-# Uygulamayı Derle
-# CGO_ENABLED=1 (for SQLite) and target the correct entry point
-# CGO_ENABLED=1 (SQLite için) ve doğru giriş noktasını hedefliyoruz: ./cmd/api/main.go
+# Download dependencies and tidy up the module file.
+# Bağımlılıkları indir ve modül dosyasını düzenle.
 RUN go mod tidy && \
-    CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s" -o main ./cmd/api/main.go
+    # Enable CGO to support SQLite (requires a C compiler).
+    # SQLite desteği için CGO'yu etkinleştir (C derleyicisi gerektirir).
+    CGO_ENABLED=1 \
+    # Set the target OS to Linux.
+    # Hedef işletim sistemini Linux olarak ayarla.
+    GOOS=linux \
+    # Build the binary named 'main', stripping debug info (-w -s) for smaller size.
+    # 'main' adında binary dosyası oluştur, boyutu küçültmek için debug bilgisini sil (-w -s).
+    go build -ldflags="-w -s" -o main ./cmd/api/main.go
 
 
-# Final Stage (Nihai Çalıştırma Aşaması)
-# Use Debian 12 (Bookworm) slim which has newer GLIBC
-# Daha yeni bir GLIBC sürümüne sahip olan Debian 12 (Bookworm) minimal sürümünü kullanıyoruz.
+# --- Final Stage (Nihai Çalıştırma Aşaması) ---
+# Use Debian 12 (Bookworm) Slim for a modern, small runtime environment.
+# Modern ve küçük bir çalışma ortamı için Debian 12 (Bookworm) Slim kullan.
 FROM debian:bookworm-slim
 
+# Set the working directory.
+# Çalışma dizinini ayarla.
 WORKDIR /app
 
-# Install necessary system libraries (SQLite and CA certificates)
-# Gerekli sistem kütüphanelerini (SQLite ve sertifikalar) yüklüyoruz
+# Update package lists and install necessary runtime libraries.
+# Paket listelerini güncelle ve gerekli çalışma zamanı kütüphanelerini yükle.
+# ca-certificates: Required for HTTPS requests. / HTTPS istekleri için gerekli.
+# libsqlite3-0: Required for SQLite database. / SQLite veritabanı için gerekli.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libsqlite3-0 \
+    # Clean up apt cache to keep the image small.
+    # İmajı küçük tutmak için apt önbelleğini temizle.
     && rm -rf /var/lib/apt/lists/*
 
-# Copy binary from builder
-# Builder aşamasından binary dosyasını kopyala
+# Copy the compiled binary from the builder stage.
+# Derleyici aşamasından derlenen binary dosyasını kopyala.
 COPY --from=builder /app/main .
 
-# Expose port
-# Portu dışa aç
+# Expose port 3000 to the outside world.
+# 3000 portunu dış dünyaya aç.
 EXPOSE 3000
 
-# Run the binary
-# Binary dosyasını çalıştır
+# Command to run the application.
+# Uygulamayı çalıştırma komutu.
 CMD ["./main"]

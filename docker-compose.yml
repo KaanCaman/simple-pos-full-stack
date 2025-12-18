@@ -1,44 +1,102 @@
+# Docker Compose Version
+# Docker Compose Sürümü
 version: "3.8"
 
 services:
-  # --- BACKEND SERVICE (API Server) ---
-  # --- BACKEND SERVİSİ (API Sunucusu) ---
+  # ---------------------------------------------------------------------------
+  # BACKEND SERVICE (API Server)
+  # BACKEND SERVİSİ (API Sunucusu)
+  # ---------------------------------------------------------------------------
   backend:
+    # Build configuration for the backend service.
+    # Backend servisi için derleme yapılandırması.
     build:
+      # Context directory for the build (where the Dockerfile is relative to).
+      # Derleme için bağlam dizini (Dockerfile'ın bulunduğu dizine göre).
       context: ./backend
-      # Use the Dockerfile that runs the API
-      # API'yi çalıştıran Dockerfile'ı kullanın
+      # Specific Dockerfile to use.
+      # Kullanılacak özel Dockerfile.
       dockerfile: Dockerfile
+
+    # Custom name for the container.
+    # Konteyner için özel isim.
     container_name: simple-pos-backend
+
+    # Restart policy: Always restart unless explicitly stopped.
+    # Yeniden başlatma politikası: Açıkça durdurulmadığı sürece hep yeniden başlat.
     restart: unless-stopped
+
+    # Port mapping: Host Port 3000 -> Container Port 3000.
+    # Port eşleme: Ana Makine Portu 3000 -> Konteyner Portu 3000.
     ports:
       - "3000:3000"
+
+    # Volume mounts for persistence.
+    # Veri kalıcılığı için disk bölümleri.
     volumes:
-      - ./data:/app/data # Persist SQLite data / SQLite verisini sakla
-      - ./uploads:/app/uploads # Persist Uploads / Yüklenen dosyaları sakla
+      # Map local data folder to container data folder (for SQLite DB).
+      # Yerel veri klasörünü konteyner veri klasörüne eşle (SQLite veritabanı için).
+      - ./data:/app/data
+      # Map local uploads folder to container uploads folder (for images).
+      # Yerel yüklemeler klasörünü konteyner yüklemeler klasörüne eşle (resimler için).
+      - ./uploads:/app/uploads
+      # Map local logs folder to container logs folder.
+      # Yerel log klasörünü konteyner log klasörüne eşle.
+      - ./logs:/app/logs
+
+    # Environment variables.
+    # Ortam değişkenleri.
     environment:
+      # Location of the SQLite database inside the container.
+      # Konteyner içindeki SQLite veritabanının konumu.
       - DB_PATH=/app/data/pos.db
+
+    # Resource limits (Memory/CPU).
+    # Kaynak sınırları (Bellek/İşlemci).
     deploy:
       resources:
         limits:
+          # Maximum memory the container can use.
+          # Konteynerin kullanabileceği maksimum bellek.
           memory: 128M
         reservations:
+          # Guaranteed memory reservation.
+          # Garanti edilen bellek rezervasyonu.
           memory: 64M
 
-  # --- FRONTEND SERVICE ---
-  # --- FRONTEND SERVİSİ ---
+  # ---------------------------------------------------------------------------
+  # FRONTEND SERVICE (React + Nginx)
+  # FRONTEND SERVİSİ (React + Nginx)
+  # ---------------------------------------------------------------------------
   frontend:
+    # Build configuration for the frontend service.
+    # Frontend servisi için derleme yapılandırması.
     build:
       context: ./frontend
       dockerfile: Dockerfile
+
+    # Custom name for the container.
+    # Konteyner için özel isim.
     container_name: simple-pos-frontend
+
+    # Restart policy.
+    # Yeniden başlatma politikası.
     restart: unless-stopped
+
+    # Port mapping: Host Port 8080 -> Container Port 80.
+    # Port eşleme: Ana Makine Portu 8080 -> Konteyner Portu 80.
+    # You will access the app at http://localhost:8080 or http://IP:8080
+    # Uygulamaya http://localhost:8080 veya http://IP:8080 adresinden erişeceksiniz.
     ports:
       - "8080:80"
-    # Frontend waits for backend to start
-    # Frontend, backend'in başlamasını bekler
+
+    # Dependencies: Start frontend only after backend is ready.
+    # Bağımlılıklar: Frontend'i sadece backend hazır olduktan sonra başlat.
     depends_on:
       - backend
+
+    # Resource limits.
+    # Kaynak sınırları.
     deploy:
       resources:
         limits:
