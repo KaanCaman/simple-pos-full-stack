@@ -1,44 +1,46 @@
-# Build Stage
-FROM golang:1.23-alpine AS builder
+
+# Build Stage (Derleme Aşaması)
+# Use the official Go 1.24 image based on Debian (includes glibc)
+# Go 1.24'ün Debian tabanlı (glibc içeren) resmi imajını kullanıyoruz.
+FROM golang:1.24 AS builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache git
-
-# Copy go mod and sum files
+# Copy go mod and source files
+# go mod ve kaynak dosyaları kopyala
 COPY go.mod ./
-# COPY go.sum ./ # go.sum doesn't exist yet, but will be created. 
-# To avoid error if go.sum doesn't exist, we can skip it or just copy everything.
-# Best practice is to copy go.mod/sum first. I'll assume go.sum might be created by `go mod tidy` in the `backend setup` step which I ran.
-# I'll check if go.sum exists. If not, `COPY go.mod go.su[m] ./` works as a hack or just COPY go.mod ./ if I am sure.
-# I ran `go mod init`. I didn't run `go mod tidy`. So go.sum might not exist.
-# Safest is to just COPY . . and build. But caching modules is better.
-# Let's assume the user will run go mod tidy or I will run it before building.
-# For now, I will use a standard pattern but handle the missing sum file if needed.
-
-COPY go.mod ./
-# Copy source code
 COPY . .
 
 # Build the application
-# CGO_ENABLED=0 for static binary, though alpine doesn't strictly need it if linking against musl.
-# -ldflags="-w -s" to reduce binary size.
-RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o main ./cmd/main.go || go build -ldflags="-w -s" -o main . # Fallback if cmd/main.go doesn't exist (it doesn't yet, but folders do)
+# Uygulamayı Derle
+# CGO_ENABLED=1 (for SQLite) and target the correct entry point
+# CGO_ENABLED=1 (SQLite için) ve doğru giriş noktasını hedefliyoruz: ./cmd/api/main.go
+RUN go mod tidy && \
+    CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s" -o main ./cmd/api/main.go
 
-# Final Stage
-FROM alpine:latest
+
+# Final Stage (Nihai Çalıştırma Aşaması)
+# Use Debian 12 (Bookworm) slim which has newer GLIBC
+# Daha yeni bir GLIBC sürümüne sahip olan Debian 12 (Bookworm) minimal sürümünü kullanıyoruz.
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
-# Install certificates for HTTPS (useful if app makes external requests)
-RUN apk --no-cache add ca-certificates
+# Install necessary system libraries (SQLite and CA certificates)
+# Gerekli sistem kütüphanelerini (SQLite ve sertifikalar) yüklüyoruz
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libsqlite3-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy binary from builder
+# Builder aşamasından binary dosyasını kopyala
 COPY --from=builder /app/main .
 
-# Expose port (Fiber defaults to 3000)
+# Expose port
+# Portu dışa aç
 EXPOSE 3000
 
 # Run the binary
+# Binary dosyasını çalıştır
 CMD ["./main"]

@@ -1,23 +1,32 @@
+version: "3.8"
+
 services:
+  # --- BACKEND SERVICE (API Server) ---
+  # --- BACKEND SERVİSİ (API Sunucusu) ---
   backend:
     build:
       context: ./backend
+      # Use the Dockerfile that runs the API
+      # API'yi çalıştıran Dockerfile'ı kullanın
       dockerfile: Dockerfile
     container_name: simple-pos-backend
     restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
-      - ./data:/app/data # Persist SQLite data
+      - ./data:/app/data # Persist SQLite data / SQLite verisini sakla
+      - ./uploads:/app/uploads # Persist Uploads / Yüklenen dosyaları sakla
     environment:
       - DB_PATH=/app/data/pos.db
     deploy:
       resources:
         limits:
-          memory: 128M # Limited memory for low-spec device
+          memory: 128M
         reservations:
           memory: 64M
 
+  # --- FRONTEND SERVICE ---
+  # --- FRONTEND SERVİSİ ---
   frontend:
     build:
       context: ./frontend
@@ -26,11 +35,13 @@ services:
     restart: unless-stopped
     ports:
       - "8080:80"
+    # Frontend waits for backend to start
+    # Frontend, backend'in başlamasını bekler
     depends_on:
       - backend
     deploy:
       resources:
         limits:
-          memory: 128M # Limited memory
+          memory: 128M
         reservations:
           memory: 64M
