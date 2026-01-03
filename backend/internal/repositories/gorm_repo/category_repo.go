@@ -1,6 +1,7 @@
 package gorm_repo
 
 import (
+	"errors"
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
 
@@ -16,6 +17,43 @@ func NewCategoryRepository(db *gorm.DB) repositories.CategoryRepository {
 }
 
 func (r *categoryRepository) Create(category *models.Category) error {
+	var existingCategory models.Category
+	// Check if category exists (including soft-deleted)
+	// Kategori var mı kontrol et (silinmişler dahil)
+	err := r.db.Unscoped().Where("name = ?", category.Name).First(&existingCategory).Error
+
+	if err == nil {
+		// Category found / Kategori bulundu
+		if existingCategory.DeletedAt.Valid {
+			// Soft-deleted -> Restore and Update
+			// Silinmiş -> Geri yükle ve Güncelle
+			existingCategory.DeletedAt = gorm.DeletedAt{} // Restore / Geri yükle
+			existingCategory.Icon = category.Icon
+			existingCategory.Color = category.Color
+			existingCategory.IsActive = true
+
+			if saveErr := r.db.Save(&existingCategory).Error; saveErr != nil {
+				return saveErr
+			}
+
+			// Return the ID of the restored category
+			// Geri yüklenen kategorinin ID'sini döndür
+			category.ID = existingCategory.ID
+			category.CreatedAt = existingCategory.CreatedAt
+			category.UpdatedAt = existingCategory.UpdatedAt
+			return nil
+		}
+		// Exists and active / Var ve aktif
+		return errors.New("category with this name already exists")
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		// Database error / Veritabanı hatası
+		return err
+	}
+
+	// Not found -> Create new
+	// Bulunamadı -> Yeni oluştur
 	return r.db.Create(category).Error
 }
 

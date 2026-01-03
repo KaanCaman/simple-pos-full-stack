@@ -1,6 +1,7 @@
 package gorm_repo
 
 import (
+	"errors"
 	"simple-pos/internal/models"
 	"simple-pos/internal/repositories"
 
@@ -16,6 +17,42 @@ func NewTableRepository(db *gorm.DB) repositories.TableRepository {
 }
 
 func (r *tableRepository) Create(table *models.Table) error {
+	var existingTable models.Table
+	// Check if table exists (including soft-deleted)
+	// Masa var mı kontrol et (silinmişler dahil)
+	err := r.db.Unscoped().Where("name = ?", table.Name).First(&existingTable).Error
+
+	if err == nil {
+		// Table found / Masa bulundu
+		if existingTable.DeletedAt.Valid {
+			// Soft-deleted -> Restore and Update
+			// Silinmiş -> Geri yükle ve Güncelle
+			existingTable.DeletedAt = gorm.DeletedAt{} // Restore / Geri yükle
+			existingTable.Section = table.Section      // Update section / Bölümü güncelle
+			existingTable.Status = "available"         // Reset status / Durumu sıfırla
+
+			if saveErr := r.db.Save(&existingTable).Error; saveErr != nil {
+				return saveErr
+			}
+
+			// Return the ID of the restored table
+			// Geri yüklenen masanın ID'sini döndür
+			table.ID = existingTable.ID
+			table.CreatedAt = existingTable.CreatedAt
+			table.UpdatedAt = existingTable.UpdatedAt
+			return nil
+		}
+		// Exists and active / Var ve aktif
+		return errors.New("table with this name already exists")
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		// Database error / Veritabanı hatası
+		return err
+	}
+
+	// Not found -> Create new
+	// Bulunamadı -> Yeni oluştur
 	return r.db.Create(table).Error
 }
 
